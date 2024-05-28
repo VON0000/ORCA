@@ -27,3 +27,13 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+# vim swap files
+*.swp
+*.swo
+
+# emacs lock files
+.#*
+
+# vscode settings
+.vscode
