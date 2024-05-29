@@ -1,9 +1,4 @@
 (library
  (name ORCA)
  (public_name ORCA)
- (modules geom))
-
-(library
- (name ORCA)
- (public_name ORCA)
- (modules resolnew5))
+ (modules vector aircraft env))
