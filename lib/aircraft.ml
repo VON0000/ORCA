@@ -5,20 +5,26 @@ type acft = {
   mutable speed : Vector.vect;
   dest : Vector.vect;
   mutable active : bool;
+  mutable speedopt : Vector.vect;
 }
 
-let create_acft position speed dest active = { position; speed; dest; active }
+let create_acft position speed dest active speedopt =
+  { position; speed; dest; active; speedopt }
 
 exception Exit
 
 (* Helper function to judge the existence *)
-let judge_exist exist_list position =
+let judge_exist exist_list (position : Vector.vect) =
   (* flag -> true 间距合理
      flag -> false 间距不合理 *)
   let flag = ref true in
   try
     for i = 0 to List.length exist_list - 1 do
-      if Geom.dist2 position (List.nth exist_list i) < Const.sep *. Const.norme2
+      if
+        Geom.dist2_2d
+          (Vector.create_vect_2d position.x position.y)
+          (List.nth exist_list i)
+        < Const.sep *. Const.norme2
       then (
         flag := false;
         raise Exit)
@@ -45,7 +51,6 @@ let get_position i existing_positions =
 
 let get_speed (position : Vector.vect) (dest : Vector.vect) =
   let angle = atan2 (dest.y -. position.y) (dest.x -. position.x) in
-  (* { x = speed *. cos angle; y = speed *. sin angle } *)
   Vector.create_vect (Const.speed *. cos angle) (Const.speed *. sin angle) 0.
 
 let generate_dest i existing_dests =
@@ -64,8 +69,15 @@ let generate_dest i existing_dests =
   in
   generate_dest ()
 
-(* 生成一个大小为 dim 的 acft 数组 *)
+let get_speedopt (position : Vector.vect) (dest : Vector.vect) =
+  let cap =
+    Geom.find_cap_2d
+      (Vector.create_vect_2d position.x position.y)
+      (Vector.create_vect_2d dest.x dest.y)
+  in
+  Vector.create_vect (Const.speed *. cos cap) (Const.speed *. sin cap) 0.
 
+(* 生成一个大小为 dim 的 acft 数组 *)
 let get_arft dim =
   (* 使用 Array.make 创建一个大小为 dim 的数组，每个元素都是相同的初始记录 *)
   let arfts =
@@ -74,7 +86,8 @@ let get_arft dim =
          (Vector.create_vect 0. 0. 0.)
          (Vector.create_vect 0. 0. 0.)
          (Vector.create_vect 0. 0. 0.)
-         true)
+         true
+         (Vector.create_vect 0. 0. 0.))
   in
 
   (* 用于跟踪已生成的 dest 的列表 *)
@@ -86,9 +99,11 @@ let get_arft dim =
     let position = get_position i !existing_positions in
     let dest = generate_dest i !existing_dests in
     let speed = get_speed position dest in
-    existing_positions := position :: !existing_positions;
-    existing_dests := dest :: !existing_dests;
-    arfts.(i) <- create_acft position speed dest true
+    let speedopt = get_speedopt position dest in
+    existing_positions :=
+      Vector.create_vect_2d position.x position.y :: !existing_positions;
+    existing_dests := Vector.create_vect_2d dest.x dest.y :: !existing_dests;
+    arfts.(i) <- create_acft position speed dest true speedopt
   done;
 
   (* 返回生成的 acft 数组 *)
