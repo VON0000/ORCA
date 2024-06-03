@@ -21,9 +21,7 @@ let judge_exist exist_list (position : Vector.vect) =
   try
     for i = 0 to List.length exist_list - 1 do
       if
-        Geom.dist2_2d
-          (Vector.create_vect_2d position.x position.y)
-          (List.nth exist_list i)
+        Geom.dist2_2d (Vector.vect_2_vect_2d position) (List.nth exist_list i)
         < Const.sep *. Const.norme2
       then (
         flag := false;
@@ -100,9 +98,8 @@ let get_arft dim =
     let dest = generate_dest i !existing_dests in
     let speed = get_speed position dest in
     let speedopt = get_speedopt position dest in
-    existing_positions :=
-      Vector.create_vect_2d position.x position.y :: !existing_positions;
-    existing_dests := Vector.create_vect_2d dest.x dest.y :: !existing_dests;
+    existing_positions := Vector.vect_2_vect_2d position :: !existing_positions;
+    existing_dests := Vector.vect_2_vect_2d dest :: !existing_dests;
     arfts.(i) <- create_acft position speed dest true speedopt
   done;
 

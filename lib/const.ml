@@ -2,6 +2,9 @@ let radius = 300. (*taille de la fenetre*)
 let dscreen = 50 + truncate radius (*taille de la fenetre étendue*)
 let tau = 60. (*horizon en secondes*)
 let pi = acos (-1.)
+let epsilon = 0.0
+let debug = ref false
+let pas = 1. (*pas de temps*)
 
 let get_sep () =
   (* 打印提示信息 *)

@@ -1,11 +1,9 @@
-let debug = ref false
-
 (* 定义一个无穷大的数 *)
 let mini = ref (1. /. 0.)
 
 let vectu (pa : Vector.vect) (sa : Vector.vect) (pb : Vector.vect)
     (sb : Vector.vect) =
-  debug := false;
+  Const.debug := false;
   (* a,b相对位置 *)
   let pr_2d = Vector.create_vect_2d (pb.x -. pa.x) (pb.y -. pa.y) in
   let npr, npa = Geom.normangle_2d pr_2d in
@@ -51,7 +49,7 @@ let vectu (pa : Vector.vect) (sa : Vector.vect) (pb : Vector.vect)
     if
       Geom.pvect_2d p1 prbis vr_2d > 0. && Geom.pvect_2d vr_2d prbis pr_2d >= 0.
     then (
-      if !debug then (
+      if !Const.debug then (
         Printf.printf "SECTEUR 1\n";
         flush stdout);
       let alpha = nva -. npa1 in
@@ -68,7 +66,7 @@ let vectu (pa : Vector.vect) (sa : Vector.vect) (pb : Vector.vect)
     else if
       Geom.pvect_2d pr_2d prbis vr_2d > 0. && Geom.pvect_2d vr_2d prbis p2 >= 0.
     then (
-      if !debug then (
+      if !Const.debug then (
         Printf.printf "SECTEUR 2\n";
         flush stdout);
       let alpha = npa2 -. nva in
