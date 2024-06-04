@@ -48,10 +48,7 @@ let vectu (pa : Vector.vect) (sa : Vector.vect) (pb : Vector.vect)
 
     if
       Geom.pvect_2d p1 prbis vr_2d > 0. && Geom.pvect_2d vr_2d prbis pr_2d >= 0.
-    then (
-      if !Const.debug then (
-        Printf.printf "SECTEUR 1\n";
-        flush stdout);
+    then
       let alpha = nva -. npa1 in
       let nvrsa = nvr *. sin alpha in
       let abs_nvrsa = abs_float nvrsa in
@@ -62,13 +59,10 @@ let vectu (pa : Vector.vect) (sa : Vector.vect) (pb : Vector.vect)
       in
       Some
         ( Vector.create_vect_2d (nvrsa *. u.x) (nvrsa *. u.y),
-          Vector.create_vect_2d (abs_nvrsa *. u.x) (abs_nvrsa *. u.y) ))
+          Vector.create_vect_2d (abs_nvrsa *. u.x) (abs_nvrsa *. u.y) )
     else if
       Geom.pvect_2d pr_2d prbis vr_2d > 0. && Geom.pvect_2d vr_2d prbis p2 >= 0.
-    then (
-      if !Const.debug then (
-        Printf.printf "SECTEUR 2\n";
-        flush stdout);
+    then
       let alpha = npa2 -. nva in
       let nvrsa = nvr *. sin alpha in
       let abs_nvrsa = abs_float nvrsa in
@@ -79,5 +73,5 @@ let vectu (pa : Vector.vect) (sa : Vector.vect) (pb : Vector.vect)
       in
       Some
         ( Vector.create_vect_2d (nvrsa *. u.x) (nvrsa *. u.y),
-          Vector.create_vect_2d (abs_nvrsa *. u.x) (abs_nvrsa *. u.y) ))
+          Vector.create_vect_2d (abs_nvrsa *. u.x) (abs_nvrsa *. u.y) )
     else region_neutre vrbis nvrbis

@@ -30,6 +30,8 @@ let opp_2d (v : Vector.vect_2d) = Vector.create_vect_2d (-.v.x) (-.v.y)
 let pvect_2d (p1 : Vector.vect_2d) (p0 : Vector.vect_2d) (p2 : Vector.vect_2d) =
   ((p1.x -. p0.x) *. (p2.y -. p0.y)) -. ((p2.x -. p0.x) *. (p1.y -. p0.y))
 
+let determ_2d nax nbx nay nby = (nax *. nby) -. (nbx *. nay)
+
 (* croisement du segment a b et c d*)
 (* 判断线段ab与cd是否相交 *)
 (* 判断a,b(c,d)两点是否在线段cd(ab)两侧 *)
@@ -83,3 +85,126 @@ let proj_pt_vec c a v =
   Vector.create_vect_2d
     (d *. cos (alpha +. (Const.pi /. 2.)))
     (d *. sin (alpha +. (Const.pi /. 2.)))
+
+exception Droites_confondues
+exception No_solution
+
+let solve pa na pb nb =
+  let ca = scal_2d na pa and cb = scal_2d nb pb in
+  let d = determ_2d na.x nb.x na.y nb.y in
+  if abs_float d < Const.epsilon then
+    let pr = Vector.create_vect_2d (pb.x -. pa.x) (pb.y -. pa.y) in
+    if abs_float (vect_2d pr na) < Const.epsilon then (
+      Printf.printf "pr=%f %f\n" pr.x pr.y;
+      Printf.printf "na=%f %f\n" na.x na.y;
+      flush stdout;
+      raise Droites_confondues)
+    else (
+      Printf.printf "pr=%f %f\n" pr.x pr.y;
+      Printf.printf "na=%f %f\n" na.x na.y;
+      flush stdout;
+      raise No_solution)
+  else
+    Vector.create_vect_2d
+      (determ_2d ca cb na.y nb.y /. d)
+      (determ_2d na.x nb.x ca cb /. d)
+
+(* inside dit si un point est � l'int�rieur ou pas de la contrainte *)
+
+let inside (q : Vector.vect_2d) (p : Vector.vect_2d) v =
+  let pr = Vector.create_vect_2d (q.x -. p.x) (q.y -. p.y) in
+  scal_2d pr v >= 0.
+
+let complete cadre =
+  match cadre with
+  | [] -> []
+  | deb :: tl -> (
+      match List.rev tl with
+      | [] -> cadre
+      | fin :: _ -> if deb = fin then cadre else fin :: cadre)
+
+(* intersect calcule l'intersection d'un convexe et d'un demi-plan*)
+
+exception Vide
+
+let intersect (p : Vector.vect_2d) (v : Vector.vect_2d) cadre =
+  if !Const.debug then (
+    Printf.printf "p=%f %f\n" p.x p.y;
+    flush stdout;
+    Printf.printf "v=%f %f\n" v.x v.y;
+    flush stdout);
+  let resolve (oq : Vector.vect_2d) q p v =
+    solve q { x = oq.y -. q.y; y = q.x -. oq.x } p v
+  in
+  let rec inter p v cadre sw oq l =
+    match cadre with
+    | [] -> ( match l with [] -> raise Vide | _ -> complete (List.rev l))
+    | q :: tl ->
+        if p = q then inter p v tl sw q l
+        else
+          let inn = inside q p v in
+          if sw then
+            if inn then inter p v tl sw q (q :: l)
+            else
+              let r = resolve oq q p v in
+              inter p v tl false q (r :: l)
+          else if inn then
+            let r = resolve oq q p v in
+            inter p v tl true q (q :: r :: l)
+          else inter p v tl sw q l
+  in
+  match cadre with [] -> [] | hd :: tl -> inter p v tl (inside hd p v) hd []
+
+let pvect (p1 : Vector.vect_2d) (p0 : Vector.vect_2d) (p2 : Vector.vect_2d) =
+  ((p1.x -. p0.x) *. (p2.y -. p0.y)) -. ((p2.x -. p0.x) *. (p1.y -. p0.y))
+
+let pscal (p1 : Vector.vect_2d) (p0 : Vector.vect_2d) (p2 : Vector.vect_2d) =
+  ((p1.x -. p0.x) *. (p2.x -. p0.x)) +. ((p1.y -. p0.y) *. (p2.y -. p0.y))
+
+(* is_inside=true si un point (x,y) est dans le convexe l qui est decrit dans
+   le sens INVERSE des aiguilles d'une montre*)
+let is_inside a l =
+  match l with
+  | [] -> false
+  | hd :: _ ->
+      let rec is_in a l =
+        match l with
+        | b :: (c :: _ as ctl) -> pvect b c a < 0. && is_in a ctl
+        | [ b ] -> pvect b hd a <= 0.
+        | _ -> failwith "is_inside: unreachable"
+      in
+      is_in a l
+
+(*couple (distance point c au segment ab, point de projection)*)
+let proj_pt_seg c a b =
+  if pscal b a b = 0. then (sqrt (pscal a c a), a)
+  else if pscal b a c <= 0. then (sqrt (pscal a c a), a)
+  else if pscal a b c <= 0. then (sqrt (pscal b c b), b)
+  else
+    let ab = sqrt (pscal b a b) in
+    let u = Vector.create_vect_2d ((b.x -. a.x) /. ab) ((b.y -. a.y) /. ab) in
+    let r = abs_float (pvect b a c) /. ab
+    and s = abs_float (pscal b a c) /. ab in
+    (r, { x = a.x +. (s *. u.x); y = a.y +. (s *. u.y) })
+
+(* projection d'un vecteur sur un convexe *)
+let projection p convex =
+  let rec rec_project p convex oq r rp =
+    match convex with
+    | [] -> rp
+    | q :: tl ->
+        let s, sp = proj_pt_seg p oq q in
+        if s < r then rec_project p tl q s sp else rec_project p tl q r rp
+  in
+  match convex with
+  | [] -> failwith "convex vide"
+  | oq :: _ -> rec_project p convex oq (1. /. 0.) oq
+
+(* projection d'une vitesse sur une boite*)
+let project speed targetbox =
+  if is_inside speed targetbox then speed else projection speed targetbox
+
+(* tourne d'un angle a et multiplie par k le vecteur p*)
+let rotate k p a =
+  let pn, pa = normangle_2d p in
+  Vector.create_vect_2d (k *. pn *. cos (pa +. a)) (k *. pn *. sin (pa +. a))

@@ -5,6 +5,10 @@ let pi = acos (-1.)
 let epsilon = 0.0
 let debug = ref false
 let pas = 1. (*pas de temps*)
+let sizelong = 1. *. pas (*manoeuvrabilité longitudinale*)
+let nb = 20 (*nombre de facettes de la boite contenant les vitesses*)
+let delai = 0.5 (*delai pour ralentir l'affichage*)
+let coeff = 50. (*zoom d'affichage des rayons des vitesse*)
 
 let get_sep () =
   (* 打印提示信息 *)

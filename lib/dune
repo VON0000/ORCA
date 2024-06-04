@@ -1,4 +1,4 @@
 (library
  (name ORCA)
  (public_name ORCA)
- (modules vector aircraft env geom const action fly2d))
+ (modules vector aircraft env geom const action plot fly2d))

@@ -6,10 +6,11 @@ type acft = {
   dest : Vector.vect;
   mutable active : bool;
   mutable speedopt : Vector.vect;
+  route : Vector.vect list;
 }
 
 let create_acft position speed dest active speedopt =
-  { position; speed; dest; active; speedopt }
+  { position; speed; dest; active; speedopt; route = [ position; dest ] }
 
 exception Exit
 
