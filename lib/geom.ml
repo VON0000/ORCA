@@ -1,4 +1,4 @@
-type t = { mutable x : float; mutable y : float }
+type t = { x : float; y : float }
 
 let create_t x y = { x; y }
 
@@ -29,4 +29,4 @@ let opp_2d (v : t) = create_t (-.v.x) (-.v.y)
 let pvect_2d (p1 : t) (p0 : t) (p2 : t) =
   ((p1.x -. p0.x) *. (p2.y -. p0.y)) -. ((p2.x -. p0.x) *. (p1.y -. p0.y))
 
-let determ_2d nax nbx nay nby = (nax *. nby) -. (nbx *. nay)
+let determ_2d (na : t) (nb : t) = (na.x *. nb.y) -. (nb.x *. na.y)
