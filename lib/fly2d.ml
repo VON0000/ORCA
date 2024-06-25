@@ -2,5 +2,5 @@
 open Aircraft
 
 let run =
-  let arfts = Aircraft.get_arft_lst Const.dim in
-  Aircraft.read_acft arfts
+  let _ = Aircraft.get_arft_lst Const.dim in
+  ()

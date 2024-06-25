@@ -104,13 +104,3 @@ let get_arft_lst dim =
   (* 返回生成的 acft 数组 *)
   arfts
 
-let read_acft acfts =
-  for i = 0 to Array.length acfts do
-    let _ = acfts.(i).position in
-    let _ = acfts.(i).speed in
-    let _ = acfts.(i).dest in
-    let _ = acfts.(i).active in
-    let _ = acfts.(i).speedopt in
-    let _ = acfts.(i).route in
-    ()
-  done
