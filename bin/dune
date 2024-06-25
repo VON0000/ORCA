@@ -1,5 +1,0 @@
-(executable
- (name main)
- (public_name ORCA.main)
- (modules main)
- (libraries ORCA))
