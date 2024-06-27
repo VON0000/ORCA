@@ -1,18 +1,6 @@
 (* p=position; s=speed; d=dest *)
 open Geom
 
-type acft = {
-  position : Geom.t;
-  speed : Geom.t;
-  dest : Geom.t;
-  active : bool;
-  speedopt : Geom.t;
-  route : Geom.t list;
-}
-
-let create_acft position speed dest active speedopt =
-  { position; speed; dest; active; speedopt; route = [ position; dest ] }
-
 exception Exit
 
 (* Helper function to judge the existence *)
@@ -34,7 +22,8 @@ let judge_exist exist_list (position : Geom.t) =
 
 let radius = 300. (*taille de la fenetre*)
 
-let get_position i existing_positions =
+let get_position i existing_arfts =
+  let existing_positions = List.map (fun x -> x#position) existing_arfts in
   let rec generate_position () =
     let position =
       Geom.create_t
@@ -54,7 +43,8 @@ let get_speed (position : Geom.t) (dest : Geom.t) =
   let angle = atan2 (dest.y -. position.y) (dest.x -. position.x) in
   Geom.create_t (Const.speed *. cos angle) (Const.speed *. sin angle)
 
-let generate_dest i existing_dests =
+let get_dest i existing_arfts =
+  let existing_dests = List.map (fun x -> x#dest) existing_arfts in
   let rec generate_dest () =
     let dest =
       Geom.create_t
@@ -77,30 +67,45 @@ let get_speedopt (position : Geom.t) (dest : Geom.t) =
   in
   Geom.create_t (Const.speed *. cos cap) (Const.speed *. sin cap)
 
-(* 生成一个大小为 dim 的 acft 数组 *)
-let get_arft_lst dim =
-  (* 使用 Array.make 创建一个大小为 dim 的数组，每个元素都是相同的初始记录 *)
-  let arfts =
-    Array.make dim
-      (create_acft (Geom.create_t 0. 0.) (Geom.create_t 0. 0.)
-         (Geom.create_t 0. 0.) true (Geom.create_t 0. 0.))
-  in
+module Aircraft : AircraftSig = struct
+  type t = {
+    mutable position : Geom.t;
+    mutable dest : Geom.t;
+    mutable speed : Geom.t;
+    mutable active : bool;
+    mutable speedopt : Geom.t;
+    mutable route : Geom.t list;
+  }
 
-  (* 用于跟踪已生成的 dest 的列表 *)
-  let existing_dests = ref [] in
-  let existing_positions = ref [] in
-
-  (* 迭代生成每个 acft 实例，并覆盖数组中的元素 *)
-  for i = 0 to dim - 1 do
-    let position = get_position i !existing_positions in
-    let dest = generate_dest i !existing_dests in
+  let create id exist_arfts =
+    let position = get_position id exist_arfts in
+    let dest = get_dest id exist_arfts in
     let speed = get_speed position dest in
     let speedopt = get_speedopt position dest in
-    existing_positions := position :: !existing_positions;
-    existing_dests := dest :: !existing_dests;
-    arfts.(i) <- create_acft position speed dest true speedopt
-  done;
+    {
+      position;
+      dest;
+      speed;
+      active = true;
+      speedopt;
+      route = [position; dest];
+    }
 
-  (* 返回生成的 acft 数组 *)
-  arfts
+  let get_position a = a.position
+  let get_dest a = a.dest
+  let get_speed a = a.speed
+  let get_speedopt a = a.speedopt
+  let get_route a = a.route
+  let is_active a = a.active
+end
 
+let get_arft_lst dim =
+  let rec create_list n existing_arfts =
+    if n <= 0 then existing_arfts
+    else 
+      let plane = Aircraft.create n existing_arfts in
+      create_list (n - 1) (plane :: existing_arfts)
+  in
+  create_list dim []
+
+let update_speedopt acft = get_speedopt acft.position acft.dest

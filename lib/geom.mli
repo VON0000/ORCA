@@ -1,5 +1,6 @@
 type t = { x : float; y : float; }
 val create_t : float -> float -> t
+val default_t : t
 val mean_2d : t -> t -> float * float
 val diff_2d : t -> t -> t
 val scal_2d : t -> t -> float

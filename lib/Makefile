@@ -1,4 +1,4 @@
-2OCAMLC   = ocamlfind ocamlc -g
+OCAMLC   = ocamlfind ocamlc -g
 OCAMLMLI = ocamlfind ocamlc
 OCAMLOPT = ocamlfind opt -unsafe -noassert -inline 100
 OCAMLOPT = ocamlfind opt -g
@@ -22,10 +22,10 @@ orca.opt: $(SCCMX)
 	$(OCAMLOPT) -o $@ $(SCCMX)
 DIRS = sol reduced
 .SUFFIXES: .ml .mli .cmi .cmo .cmx
-.ml.cmo:
-	$(OCAMLC) $(INCLUDES) $(LIBS_OPAM) -c $<
 .mli.cmi:
 	$(OCAMLMLI) $(INCLUDES) $<
+.ml.cmo:
+	$(OCAMLC) $(INCLUDES) $(LIBS_OPAM) -c $<
 .ml.cmx:
 	$(OCAMLOPT) $(INCLUDES) $(LIBS_OPAM) -c $<
 .depend:

@@ -1,6 +1,7 @@
 type t = { x : float; y : float }
 
 let create_t x y = { x; y }
+let default_t = { x = 0.; y = 0. }
 
 (* operations de base *)
 let mean_2d (a : t) (b : t) = ((a.x +. b.x) /. 2., (a.y +. b.y) /. 2.)
