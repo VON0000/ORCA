@@ -67,14 +67,26 @@ let get_speedopt (position : Geom.t) (dest : Geom.t) =
   in
   Geom.create_t (Const.speed *. cos cap) (Const.speed *. sin cap)
 
+module type AircraftSig = sig
+  type t
+
+  val create : int -> t list -> t
+  val get_position : t -> Geom.t
+  val get_dest : t -> Geom.t
+  val get_speed : t -> Geom.t
+  val get_speedopt : t -> Geom.t
+  val get_route : t -> Geom.t list
+  val is_active : t -> bool
+end
+
 module Aircraft : AircraftSig = struct
   type t = {
-    mutable position : Geom.t;
-    mutable dest : Geom.t;
-    mutable speed : Geom.t;
-    mutable active : bool;
-    mutable speedopt : Geom.t;
-    mutable route : Geom.t list;
+    position : Geom.t;
+    dest : Geom.t;
+    speed : Geom.t;
+    speedopt : Geom.t;
+    route : Geom.t list;
+    active : bool;
   }
 
   let create id exist_arfts =
@@ -88,7 +100,7 @@ module Aircraft : AircraftSig = struct
       speed;
       active = true;
       speedopt;
-      route = [position; dest];
+      route = [ position; dest ];
     }
 
   let get_position a = a.position
@@ -102,7 +114,7 @@ end
 let get_arft_lst dim =
   let rec create_list n existing_arfts =
     if n <= 0 then existing_arfts
-    else 
+    else
       let plane = Aircraft.create n existing_arfts in
       create_list (n - 1) (plane :: existing_arfts)
   in
