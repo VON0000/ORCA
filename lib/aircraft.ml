@@ -89,19 +89,20 @@ module Aircraft : AircraftSig = struct
     active : bool;
   }
 
-  let create id exist_arfts =
+  let create id (exist_arfts : (< position : Geom.t; dest : Geom.t; speed : Geom.t; speedopt : Geom.t; route : Geom.t; active : bool> as 'a) list) =
     let position = get_position id exist_arfts in
     let dest = get_dest id exist_arfts in
     let speed = get_speed position dest in
     let speedopt = get_speedopt position dest in
-    {
-      position;
-      dest;
-      speed;
+    let arft =
+    { position = position;
+      dest = dest;
+      speed = speed;
       active = true;
-      speedopt;
+      speedopt = speedopt;
       route = [ position; dest ];
-    }
+      } in
+      arft
 
   let get_position a = a.position
   let get_dest a = a.dest
