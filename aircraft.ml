@@ -31,7 +31,7 @@ let judge_exist exist_list (position : Geom.t) =
   with Exit -> false
 
 let def_position id exist_arft =
-  let existing_positions = List.map (fun x -> x.position) exist_arft in
+  let existing_positions = List.map (fun x -> x.position) !exist_arft in
   let rec generate_position () =
     let position =
       Geom.create_t
@@ -48,7 +48,7 @@ let def_position id exist_arft =
   generate_position ()
 
 let def_dest id exist_arft =
-  let existing_dests = List.map (fun x -> x.dest) exist_arft in
+  let existing_dests = List.map (fun x -> x.dest) !exist_arft in
   let rec generate_dest () =
     let dest =
       Geom.create_t
@@ -71,7 +71,7 @@ let def_speedopt position dest =
   let cap = Geom.find_cap_2d position dest in
   Geom.create_t (Const.speed *. cos cap) (Const.speed *. sin cap)
 
-let create id exist_arft =
+let create id (exist_arft : t list ref) =
   let position = def_position id exist_arft in
   let dest = def_dest id exist_arft in
   let speed = def_speed position dest in
@@ -105,3 +105,15 @@ let get_route arft =
 
 let get_active arft = 
   arft.active
+
+(* 生成一个大小为 dim 的 acft 数组 *)
+let get_arft_lst dim =
+  let arfts = ref [] in
+
+  (* 迭代生成每个 acft 实例，并覆盖数组中的元素 *)
+  for i = 0 to dim - 1 do
+    arfts := create i arfts :: !arfts;
+  done;
+
+  (* 返回生成的 acft 数组 *)
+  arfts
