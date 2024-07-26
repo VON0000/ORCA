@@ -13,9 +13,11 @@ let scal_2d (a : t) (b : t) = (a.x *. b.x) +. (a.y *. b.y)
 (* 叉乘 *)
 let vect_2d (a : t) (b : t) = (a.x *. b.y) -. (a.y *. b.x)
 
-(* retourne la norme et l'angle de v*)
-let norm_2d (v : t) = sqrt (scal_2d v v)
-let angle_2d (v : t) = atan2 v.y v.x
+(* retourne la norme et l'angle de a*)
+let norm_2d (a : t) = sqrt (scal_2d a a)
+let angle_2d (a : t) = atan2 a.y a.x
+
+let heading_angle a b = atan2 (b.y -. a.y) (b.x -. a.x)
 
 let dist2_2d (a : t) (b : t) =
   let dx = a.x -. b.x and dy = a.y -. b.y in

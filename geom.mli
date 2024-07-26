@@ -7,6 +7,7 @@ val scal_2d : t -> t -> float
 val vect_2d : t -> t -> float
 val norm_2d : t -> float
 val angle_2d : t -> float
+val heading_angle : t -> t -> float
 val dist2_2d : t -> t -> float
 val find_cap_2d : t -> t -> float
 val opp_2d : t -> t
