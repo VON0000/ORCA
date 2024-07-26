@@ -81,9 +81,27 @@ let create id exist_arft =
       position;
       dest;
       speed;
-      active = true;
       speedopt;
       route = [ position; dest ];
+      active = true;
     }
   in
   arft
+
+let get_position arft =
+  arft.position
+
+let get_dest arft = 
+  arft.dest
+
+let get_speed arft = 
+  arft.speed
+
+let get_speedopt arft = 
+  arft.speedopt
+
+let get_route arft = 
+  arft.route
+
+let get_active arft = 
+  arft.active
