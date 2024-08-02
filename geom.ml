@@ -16,7 +16,6 @@ let vect_2d (a : t) (b : t) = (a.x *. b.y) -. (a.y *. b.x)
 (* retourne la norme et l'angle de a*)
 let norm_2d (a : t) = sqrt (scal_2d a a)
 let angle_2d (a : t) = atan2 a.y a.x
-
 let heading_angle a b = atan2 (b.y -. a.y) (b.x -. a.x)
 
 let dist2_2d (a : t) (b : t) =
@@ -29,7 +28,10 @@ let find_cap_2d (p : t) (d : t) = atan2 (d.y -. p.y) (d.x -. p.x)
 (* 反向 *)
 let opp_2d (v : t) = create_t (-.v.x) (-.v.y)
 
-let pvect_2d (p1 : t) (p0 : t) (p2 : t) =
+(* p0 -> p1 向量 和 p0 -> p2 向量 做外积
+   结果大于零 夹角小于 180 p2位于 p0 -> p1 左边
+   小于零 夹角大于 180 p2位于 p0 -> p1 右边 *)
+let pvect_2d (p0 : t) (p1 : t) (p2 : t) =
   ((p1.x -. p0.x) *. (p2.y -. p0.y)) -. ((p2.x -. p0.x) *. (p1.y -. p0.y))
 
 let determ_2d (na : t) (nb : t) = (na.x *. nb.y) -. (nb.x *. na.y)

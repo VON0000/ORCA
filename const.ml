@@ -66,3 +66,17 @@ let get_speed () =
     exit 1
 
 let speed = get_speed ()
+
+let get_pas () = 
+  (* 打印提示信息 *)
+  Printf.printf "input the time step: ";
+  (* 刷新输出缓冲区，确保提示信息立即显示 *)
+  flush stdout;
+  (* 获取用户输入并解析为整数 *)
+  try
+    let speed = read_float () in
+    Printf.printf "the speed of drones is: %f\n" speed;
+    speed
+  with Failure _ ->
+    Printf.printf "invalid input of the speed of drones\n";
+    exit 1

@@ -30,8 +30,8 @@ let judge_exist exist_list (position : Geom.t) =
     !flag
   with Exit -> false
 
-let def_position id exist_arft =
-  let existing_positions = List.map (fun x -> x.position) !exist_arft in
+let def_position id exist_acft =
+  let existing_positions = List.map (fun x -> x.position) !exist_acft in
   let rec generate_position () =
     let position =
       Geom.create_t
@@ -47,8 +47,8 @@ let def_position id exist_arft =
   in
   generate_position ()
 
-let def_dest id exist_arft =
-  let existing_dests = List.map (fun x -> x.dest) !exist_arft in
+let def_dest id exist_acft =
+  let existing_dests = List.map (fun x -> x.dest) !exist_acft in
   let rec generate_dest () =
     let dest =
       Geom.create_t
@@ -71,12 +71,12 @@ let def_speedopt position dest =
   let cap = Geom.find_cap_2d position dest in
   Geom.create_t (Const.speed *. cos cap) (Const.speed *. sin cap)
 
-let create id (exist_arft : t list ref) =
-  let position = def_position id exist_arft in
-  let dest = def_dest id exist_arft in
+let create id (exist_acft : t list ref) =
+  let position = def_position id exist_acft in
+  let dest = def_dest id exist_acft in
   let speed = def_speed position dest in
   let speedopt = def_speedopt position dest in
-  let arft =
+  let acft =
     {
       position;
       dest;
@@ -86,34 +86,41 @@ let create id (exist_arft : t list ref) =
       active = true;
     }
   in
-  arft
+  acft
 
-let get_position arft =
-  arft.position
+let get_position acft =
+  acft.position
 
-let get_dest arft = 
-  arft.dest
+let get_dest acft = 
+  acft.dest
 
-let get_speed arft = 
-  arft.speed
+let get_speed acft = 
+  acft.speed
 
-let get_speedopt arft = 
-  arft.speedopt
+let get_speedopt acft = 
+  acft.speedopt
 
-let get_route arft = 
-  arft.route
+let get_route acft = 
+  acft.route
 
-let get_active arft = 
-  arft.active
+let get_active acft = 
+  acft.active
 
 (* 生成一个大小为 dim 的 acft 数组 *)
-let get_arft_lst dim =
-  let arfts = ref [] in
+let get_acft_lst dim =
+  let acfts = ref [] in
 
   (* 迭代生成每个 acft 实例，并覆盖数组中的元素 *)
   for i = 0 to dim - 1 do
-    arfts := create i arfts :: !arfts;
+    acfts := create i acfts :: !acfts;
   done;
 
   (* 返回生成的 acft 数组 *)
-  arfts
+  acfts
+
+let pas = 1. (*pas de temps*)
+
+let  undate_new_speed acft = 
+  let new_x = acft.position.x + pas * acft.speed.x 
+  and new_y = acft.position.y + pas * acft.speed.y in
+  if not (Array.fold_left 

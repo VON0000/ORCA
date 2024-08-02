@@ -6,7 +6,7 @@ let is_stop dim fin =
 
 let run =
   let fin = ref 0 in
-  let acfts = Aircraft.get_arft_lst Const.dim in
+  let acfts = Aircraft.get_acft_lst Const.dim in
   (
       while is_stop Const.dim fin do
           move
