@@ -1,10 +1,12 @@
 (* p=position; s=speed; d=dest *)
 open Geom
+open Env
+open Const
 
 exception Exit
 
 type t = {
-  position : Geom.t;
+  mutable position : Geom.t;
   dest : Geom.t;
   speed : Geom.t;
   speedopt : Geom.t;
@@ -88,23 +90,12 @@ let create id (exist_acft : t list ref) =
   in
   acft
 
-let get_position acft =
-  acft.position
-
-let get_dest acft = 
-  acft.dest
-
-let get_speed acft = 
-  acft.speed
-
-let get_speedopt acft = 
-  acft.speedopt
-
-let get_route acft = 
-  acft.route
-
-let get_active acft = 
-  acft.active
+let get_position acft = acft.position
+let get_dest acft = acft.dest
+let get_speed acft = acft.speed
+let get_speedopt acft = acft.speedopt
+let get_route acft = acft.route
+let get_active acft = acft.active
 
 (* 生成一个大小为 dim 的 acft 数组 *)
 let get_acft_lst dim =
@@ -112,7 +103,7 @@ let get_acft_lst dim =
 
   (* 迭代生成每个 acft 实例，并覆盖数组中的元素 *)
   for i = 0 to dim - 1 do
-    acfts := create i acfts :: !acfts;
+    acfts := create i acfts :: !acfts
   done;
 
   (* 返回生成的 acft 数组 *)
@@ -120,7 +111,13 @@ let get_acft_lst dim =
 
 let pas = 1. (*pas de temps*)
 
-let  undate_new_speed acft = 
-  let new_x = acft.position.x + pas * acft.speed.x 
-  and new_y = acft.position.y + pas * acft.speed.y in
-  if not (Array.fold_left 
+let move_one acft =
+  let new_x = acft.position.x +. (pas *. acft.speed.x)
+  and new_y = acft.position.y +. (pas *. acft.speed.y) in
+  if
+    not
+      (Array.fold_left
+         (fun tf o -> tf || is_inside (Geom.create_t new_x new_y) o)
+         false Env.obstacle)
+  then acft.position <- Geom.create_t new_x new_y
+  else Printf.printf "ENTREE DANS OBSTACLE\n"
