@@ -4,14 +4,15 @@ type t = {
   speed : Geom.t;
   speedopt : Geom.t;
   route : Geom.t list;
-  active : bool;
+  mutable active : bool;
 }
 
+val update_speedopt : t -> Geom.t
 val get_position : t -> Geom.t
 val get_dest : t -> Geom.t
 val get_speed : t -> Geom.t
 val get_speedopt : t -> Geom.t
 val get_route : t -> Geom.t list
 val get_active : t -> bool
-val get_acft_lst : int -> t list ref
+val acft_lst : t list ref
 val move_one : t -> unit

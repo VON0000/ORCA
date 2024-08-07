@@ -10,7 +10,7 @@ INCLUDES = -I .
 #LIBS_OPAM = -package zmq
 #LIBS_OPT = $(LIBS_USR:.cma=.cmxa)
 #LIBS_BIN = $(LIBS_USR)
-SCML = geom.ml const.ml env.ml aircraft.ml
+SCML = geom.ml const.ml env.ml aircraft.ml fly2d.ml
 SCCMO = $(SCML:.ml=.cmo)
 SCCMX = $(SCML:.ml=.cmx)
 all: opt

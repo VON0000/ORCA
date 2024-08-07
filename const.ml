@@ -67,7 +67,7 @@ let get_speed () =
 
 let speed = get_speed ()
 
-let get_pas () = 
+let get_pas () =
   (* 打印提示信息 *)
   Printf.printf "input the time step: ";
   (* 刷新输出缓冲区，确保提示信息立即显示 *)
@@ -80,3 +80,6 @@ let get_pas () =
   with Failure _ ->
     Printf.printf "invalid input of the speed of drones\n";
     exit 1
+
+let pas = get_pas ()
+let tau = 60. (*horizon en secondes*)

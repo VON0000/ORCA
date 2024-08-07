@@ -11,7 +11,7 @@ type t = {
   speed : Geom.t;
   speedopt : Geom.t;
   route : Geom.t list;
-  active : bool;
+  mutable active : bool;
 }
 
 let radius = 300. (* taille de la fenêtre *)
@@ -77,7 +77,7 @@ let create id (exist_acft : t list ref) =
   let position = def_position id exist_acft in
   let dest = def_dest id exist_acft in
   let speed = def_speed position dest in
-  let speedopt = def_speedopt position dest in
+  let speedopt = def_speed position dest in
   let acft =
     {
       position;
@@ -89,6 +89,10 @@ let create id (exist_acft : t list ref) =
     }
   in
   acft
+
+let update_speedopt acft =
+  let cap = Geom.find_cap_2d acft.position acft.dest in
+  Geom.create_t (Const.speed *. cos cap) (Const.speed *. sin cap)
 
 let get_position acft = acft.position
 let get_dest acft = acft.dest
@@ -109,6 +113,7 @@ let get_acft_lst dim =
   (* 返回生成的 acft 数组 *)
   acfts
 
+let acft_lst = get_acft_lst Const.dim
 let pas = 1. (*pas de temps*)
 
 let move_one acft =
@@ -117,7 +122,8 @@ let move_one acft =
   if
     not
       (Array.fold_left
-         (fun tf o -> tf || is_inside (Geom.create_t new_x new_y) o)
+         (fun tf o -> tf || Geom.is_inside (Geom.create_t new_x new_y) o)
          false Env.obstacle)
   then acft.position <- Geom.create_t new_x new_y
-  else Printf.printf "ENTREE DANS OBSTACLE\n"
+  else Printf.printf "ENTREE DANS OBSTACLE\n";
+  ()
