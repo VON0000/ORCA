@@ -9,7 +9,7 @@ type t = {
   mutable position : Geom.t;
   dest : Geom.t;
   speed : Geom.t;
-  speedopt : Geom.t;
+  mutable speedopt : Geom.t;
   route : Geom.t list;
   mutable active : bool;
 }
@@ -126,4 +126,5 @@ let move_one acft =
          false Env.obstacle)
   then acft.position <- Geom.create_t new_x new_y
   else Printf.printf "ENTREE DANS OBSTACLE\n";
+  acft.speedopt <- update_speedopt acft;
   ()

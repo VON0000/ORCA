@@ -102,7 +102,7 @@ let pi = acos (-1.)
 (* 求的是c点到 过a点以v为向量的 直线的向量（方向指向c） *)
 (* d 是c点到 过a点以v为向量的 直线的距离 *)
 (* x,y 是 d 向量的坐标 *)
-let proj_c_to_av c a v =
+let projecton_point_to_vector c a v =
   if scal_2d v v = 0. then failwith "projection sur une droite sans direction";
   let ac = diff_2d c a in
   let alpha = angle_2d v in

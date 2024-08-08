@@ -24,14 +24,45 @@ let move_all dim acfts flag_fin =
       flush fichmem)
   done
 
-let get_constrants_entre_avions i acfts =
+let get_constrants_entre_avions i acfts constraints =
   let local_acft = List.nth acfts i in
   for j = 0 to i - 1 do
     let ref_acft = List.nth acfts j in
     if ref_acft.active then ()
   done
 
-let get_constrants_obstacle i acfts =
+let get_delta_speed previ local_acft d g =
+  let delta_v_droite =
+    Geom.projecton_point_to_vector previ local_acft.position
+      (Geom.diff_2d d local_acft.position)
+  in
+  let angle_ext_position_d =
+    Geom.angle_2d (Geom.diff_2d d local_acft.position)
+  in
+  let angle_ext_d =
+    Geom.create_t
+      (cos (angle_ext_position_d -. (Geom.pi /. 2.)))
+      (sin (angle_ext_position_d -. (Geom.pi /. 2.)))
+  in
+  let delta_v_gauche =
+    Geom.projecton_point_to_vector previ local_acft.position
+      (Geom.diff_2d g local_acft.position)
+  in
+  let angle_ext_position_g =
+    Geom.angle_2d (Geom.diff_2d g local_acft.position)
+  in
+  let angle_ext_g =
+    Geom.create_t
+      (cos (angle_ext_position_g +. (Geom.pi /. 2.)))
+      (sin (angle_ext_position_g +. (Geom.pi /. 2.)))
+  in
+  if
+    Geom.scal_2d delta_v_droite delta_v_droite
+    < Geom.scal_2d delta_v_gauche delta_v_gauche
+  then (delta_v_droite, angle_ext_d)
+  else (delta_v_gauche, angle_ext_g)
+
+let get_constrants_obstacle i acfts constraints =
   let local_acft = List.nth acfts i in
   let previ_opt_tau =
     Geom.create_t
@@ -52,12 +83,20 @@ let get_constrants_obstacle i acfts =
       || Geom.cross_segconv local_acft.position previ_tau Env.obstacle.(j)
     then
       let d, g = Geom.extremes local_acft.position Env.obstacle.(j) in
-      ()
+      let delta_v, angle_ext = get_delta_speed previ local_acft d g in
+      constraints.(i) <- (delta_v, angle_ext, false) :: constraints.(i)
   done
 
 let run =
   let flag_fin = ref 0 in
-  let acfts = Aircraft.acft_lst in
+  let acfts = !Aircraft.acft_lst in
   while is_stop Const.dim !flag_fin do
-    move_all Const.dim !acfts flag_fin
+    let constraints = Array.init dim (fun i -> []) in
+    for i = 0 to dim - 1 do
+      if (List.nth acfts i).active then (
+        get_constrants_entre_avions i acfts constraints;
+        get_constrants_obstacle i acfts constraints)
+    done;
+
+    move_all Const.dim acfts flag_fin
   done

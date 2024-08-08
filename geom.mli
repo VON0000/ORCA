@@ -16,3 +16,5 @@ val determ_2d : t -> t -> float
 val is_inside : t -> t list -> bool
 val cross_segconv : t -> t -> t list -> bool
 val extremes : t -> t list -> t * t
+val pi : float
+val projecton_point_to_vector : t -> t -> t -> t
