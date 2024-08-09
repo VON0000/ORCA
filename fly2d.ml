@@ -31,6 +31,10 @@ let get_constrants_entre_avions i acfts constraints =
     if ref_acft.active then ()
   done
 
+(* 首先寻找从无人机当前位置指向障碍物最左边或最右边的点的向量
+   以previ到这个向量的垂线为需要避免的速度
+   选取左右两边较小的一边返回
+   此时返回的速度指向previ *)
 let get_delta_speed previ local_acft d g =
   let delta_v_droite =
     Geom.projecton_point_to_vector previ local_acft.position
