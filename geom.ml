@@ -10,14 +10,17 @@ let mean_2d (a : t) (b : t) = ((a.x +. b.x) /. 2., (a.y +. b.y) /. 2.)
 let diff_2d (a : t) (b : t) = create_t (a.x -. b.x) (a.y -. b.y)
 
 (* 点积 *)
+(* > 0 -> a b 夹角小于90度
+   < 0 -> a b 夹角大于90度
+   = 0 -> a b 垂直 *)
 let scal_2d (a : t) (b : t) = (a.x *. b.x) +. (a.y *. b.y)
 
 (* 叉乘 *)
 (* |a| * |b| * sin(theta) theta <- a 到 b 的角度*)
 (* > 0 -> b 在 a 的逆时针方向（左侧）
    < 0 -> b 在 a 的顺时针方向（右侧）
-   = 0 平行或者共线 *)
-let vect_2d (a : t) (b : t) = (a.x *. b.y) -. (a.y *. b.x)
+   = 0 -> 平行或者共线 *)
+let vectoriel_2d (a : t) (b : t) = (a.x *. b.y) -. (a.y *. b.x)
 
 (* retourne la norme et l'angle de a*)
 let norm_2d (a : t) = sqrt (scal_2d a a)
@@ -37,10 +40,10 @@ let opp_2d (v : t) = create_t (-.v.x) (-.v.y)
 (* p0 -> p1 向量 和 p0 -> p2 向量 做外积
    结果大于零 夹角小于 180 p2位于 p0 -> p1 左边
    小于零 夹角大于 180 p2位于 p0 -> p1 右边 *)
-let pvect_2d (p0 : t) (p1 : t) (p2 : t) =
+let vectoriel_three_point_2d (p0 : t) (p1 : t) (p2 : t) =
   ((p1.x -. p0.x) *. (p2.y -. p0.y)) -. ((p2.x -. p0.x) *. (p1.y -. p0.y))
 
-let determ_2d (na : t) (nb : t) = (na.x *. nb.y) -. (nb.x *. na.y)
+let normal_pass_o_2d (a : t) (b : t) = { x = a.y -. b.y; y = b.x -. a.x }
 
 let is_inside a l =
   match l with
@@ -48,8 +51,9 @@ let is_inside a l =
   | hd :: _ ->
       let rec is_in a l =
         match l with
-        | b :: (c :: _ as ctl) -> pvect_2d b c a < 0. && is_in a ctl
-        | [ b ] -> pvect_2d b hd a <= 0.
+        | b :: (c :: _ as ctl) ->
+            vectoriel_three_point_2d b c a < 0. && is_in a ctl
+        | [ b ] -> vectoriel_three_point_2d b hd a <= 0.
         | _ -> failwith "is_inside: unreachable"
       in
       is_in a l
@@ -61,7 +65,8 @@ let is_inside a l =
 let cross_segs a b c d =
   let ab = diff_2d b a and ac = diff_2d c a and ad = diff_2d d a in
   let cd = diff_2d d c and ca = diff_2d a c and cb = diff_2d b c in
-  vect_2d ab ac *. vect_2d ab ad < 0. && vect_2d cd ca *. vect_2d cd cb < 0.
+  vectoriel_2d ab ac *. vectoriel_2d ab ad < 0.
+  && vectoriel_2d cd ca *. vectoriel_2d cd cb < 0.
 
 (* croisement du segment a b et convexe convex*)
 (* 线段ab是否与凸多边形convex有相交区域 *)
@@ -88,11 +93,11 @@ let extremes a l =
           (fun (d, g) p ->
           let ap = diff_2d p a in
           let ad = diff_2d d a and ag = diff_2d g a in
-          let relative_ad_ap = vect_2d ad ap in
+          let relative_ad_ap = vectoriel_2d ad ap in
           (* 找最左边的点 *)
           if relative_ad_ap < 0. then (p, g)
           else
-            let relative_ag_ap = vect_2d ag ap in
+            let relative_ag_ap = vectoriel_2d ag ap in
             (* 找最右边的点 *)
             if relative_ag_ap > 0. then (d, p) else (d, g))
         (hd, hd) l
@@ -106,5 +111,42 @@ let projecton_point_to_vector c a v =
   if scal_2d v v = 0. then failwith "projection sur une droite sans direction";
   let ac = diff_2d c a in
   let alpha = angle_2d v in
-  let d = vect_2d ac v /. norm_2d v in
-  { x = d *. cos (alpha +. (pi /. 2.)); y = d *. sin (alpha +. (pi /. 2.)) }
+  let d = vectoriel_2d ac v /. norm_2d v in
+  if angle_2d ac > angle_2d v then
+    { x = d *. cos (alpha +. (pi /. 2.)); y = d *. sin (alpha +. (pi /. 2.)) }
+  else
+    { x = d *. cos (alpha -. (pi /. 2.)); y = d *. sin (alpha -. (pi /. 2.)) }
+
+let epsilon = 0.0
+
+(* pa -> a 直线上任意一点
+   na -> a 直线法向向量
+   pb nb 同理 *)
+exception Droites_confondues
+exception No_solution
+
+let intersection_point_of_two_line pa na pb nb =
+  (* 判断两条直线是否平行或垂直 *)
+  (* 判断两个法向向量是否方向相同 *)
+  let d = vectoriel_2d na nb in
+  if abs_float d < epsilon then
+    let pr = diff_2d nb na in
+    (* 判断两条直线是否共线 *)
+    if abs_float (scal_2d pr na) < epsilon then (
+      Printf.printf "pr=%f %f\n" pr.x pr.y;
+      Printf.printf "na=%f %f\n" na.x na.y;
+      flush stdout;
+      raise Droites_confondues)
+    else (
+      Printf.printf "pr=%f %f\n" pr.x pr.y;
+      Printf.printf "na=%f %f\n" na.x na.y;
+      flush stdout;
+      raise No_solution)
+  else
+    (* na.x + nb .y = na.x *. pa.x + na.y *. pa.y 为 a 的直线方程 *)
+    (* 克莱姆法则 求解 a b 两方程的焦点 *)
+    let ca = scal_2d na pa and cb = scal_2d nb pb in
+    {
+      x = vectoriel_2d (create_t ca na.y) (create_t cb nb.y) /. d;
+      y = vectoriel_2d (create_t na.x ca) (create_t nb.x cb) /. d;
+    }
