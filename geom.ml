@@ -106,7 +106,7 @@ let pi = acos (-1.)
 
 (* 求的是c点到 过a点以v为向量的 直线的向量（方向指向c） *)
 (* d 是c点到 过a点以v为向量的 直线的距离 *)
-(* x,y 是 d 向量的坐标 *)
+(* x,y 是 d 向量（指向c）的坐标 *)
 let projecton_point_to_vector c a v =
   if scal_2d v v = 0. then failwith "projection sur une droite sans direction";
   let ac = diff_2d c a in
@@ -143,7 +143,7 @@ let intersection_point_of_two_line pa na pb nb =
       flush stdout;
       raise No_solution)
   else
-    (* na.x + nb .y = na.x *. pa.x + na.y *. pa.y 为 a 的直线方程 *)
+    (* na.x + nb.y = na.x *. pa.x + na.y *. pa.y 为 a 的直线方程 *)
     (* 克莱姆法则 求解 a b 两方程的焦点 *)
     let ca = scal_2d na pa and cb = scal_2d nb pb in
     {

@@ -12,7 +12,6 @@ val dist2_2d : t -> t -> float
 val find_cap_2d : t -> t -> float
 val opp_2d : t -> t
 val vectoriel_three_point_2d : t -> t -> t -> float
-val determ_2d : t -> t -> float
 val is_inside : t -> t list -> bool
 val cross_segconv : t -> t -> t list -> bool
 val extremes : t -> t list -> t * t
