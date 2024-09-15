@@ -5,3 +5,4 @@ val dim : int
 val speed : float
 val pas : float
 val tau : float
+val epsilon : float

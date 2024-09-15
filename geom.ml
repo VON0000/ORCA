@@ -17,8 +17,8 @@ let scal_2d (a : t) (b : t) = (a.x *. b.x) +. (a.y *. b.y)
 
 (* 叉乘 *)
 (* |a| * |b| * sin(theta) theta <- a 到 b 的角度*)
-(* > 0 -> b 在 a 的逆时针方向（左侧）
-   < 0 -> b 在 a 的顺时针方向（右侧）
+(* > 0 -> b 在 a 的逆时针方向
+   < 0 -> b 在 a 的顺时针方向
    = 0 -> 平行或者共线 *)
 let vectoriel_2d (a : t) (b : t) = (a.x *. b.y) -. (a.y *. b.x)
 
@@ -37,13 +37,12 @@ let find_cap_2d (p : t) (d : t) = atan2 (d.y -. p.y) (d.x -. p.x)
 (* 反向 *)
 let opp_2d (v : t) = create_t (-.v.x) (-.v.y)
 
-(* p0 -> p1 向量 和 p0 -> p2 向量 做外积
-   结果大于零 夹角小于 180 p2位于 p0 -> p1 左边
-   小于零 夹角大于 180 p2位于 p0 -> p1 右边 *)
-let vectoriel_three_point_2d (p0 : t) (p1 : t) (p2 : t) =
-  ((p1.x -. p0.x) *. (p2.y -. p0.y)) -. ((p2.x -. p0.x) *. (p1.y -. p0.y))
+(* p0 -> p1 向量 和 p0 -> p2 向量 做外积 *)
+let vectoriel_three_point_2d (p1 : t) (p0 : t) (p2 : t) =
+  vectoriel_2d (diff_2d p1 p0) (diff_2d p2 p0)
 
 let normal_pass_o_2d (a : t) (b : t) = { x = a.y -. b.y; y = b.x -. a.x }
+let resize_2d (a : t) (num : float) = { x = a.x /. num; y = a.y /. num }
 
 let is_inside a l =
   match l with
@@ -117,8 +116,6 @@ let projecton_point_to_vector c a v =
   else
     { x = d *. cos (alpha -. (pi /. 2.)); y = d *. sin (alpha -. (pi /. 2.)) }
 
-let epsilon = 0.0
-
 (* pa -> a 直线上任意一点
    na -> a 直线法向向量
    pb nb 同理 *)
@@ -129,10 +126,10 @@ let intersection_point_of_two_line pa na pb nb =
   (* 判断两条直线是否平行或垂直 *)
   (* 判断两个法向向量是否方向相同 *)
   let d = vectoriel_2d na nb in
-  if abs_float d < epsilon then
+  if abs_float d < Const.epsilon then
     let pr = diff_2d nb na in
     (* 判断两条直线是否共线 *)
-    if abs_float (scal_2d pr na) < epsilon then (
+    if abs_float (scal_2d pr na) < Const.epsilon then (
       Printf.printf "pr=%f %f\n" pr.x pr.y;
       Printf.printf "na=%f %f\n" na.x na.y;
       flush stdout;
