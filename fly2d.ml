@@ -149,7 +149,7 @@ let get_smallest_change_to_edge local_acft ref_acft =
         (get_smallest_change_to_edge_for_sectoral_area relative_speed
            centre_of_small_circle)
 
-let get_constrants_entre_avions i acfts constraints =
+let get_constraints_entre_avions i acfts constraints =
   let local_acft = List.nth acfts i in
   for j = 0 to i - 1 do
     let ref_acft = List.nth acfts j in
@@ -203,7 +203,7 @@ let get_delta_speed previ local_acft d g =
   then (delta_v_droite, angle_ext_d)
   else (delta_v_gauche, angle_ext_g)
 
-let get_constrants_obstacle i acfts constraints =
+let get_constraints_obstacle i acfts constraints =
   let local_acft = List.nth acfts i in
   let previ_opt_tau =
     Geom.create_t
@@ -235,8 +235,8 @@ let run =
     let constraints = Array.init dim (fun i -> []) in
     for i = 0 to dim - 1 do
       if (List.nth acfts i).active then (
-        get_constrants_entre_avions i acfts constraints;
-        get_constrants_obstacle i acfts constraints)
+        get_constraints_entre_avions i acfts constraints;
+        get_constraints_obstacle i acfts constraints)
     done;
 
     move_all Const.dim acfts flag_fin
