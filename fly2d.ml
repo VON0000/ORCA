@@ -3,6 +3,7 @@ open Aircraft
 open Geom
 open Const
 
+let sizelong = 1. *. pas (*manoeuvrabilité longitudinale*)
 let fichmem = open_out "memory"
 let is_stop dim fin = if fin < dim then true else false
 
@@ -228,6 +229,57 @@ let get_constraints_obstacle i acfts constraints =
       constraints.(i) <- (delta_v, angle_ext, false) :: constraints.(i)
   done
 
+(*boite des vitesses possibles version circulaire à facettes*)
+let speedbox speed =
+  (*nombre de facettes de la boite contenant les vitesses*)
+  let nb = 20 in
+  let angle = Geom.angle_2d speed in
+  let box =
+    Array.init (nb + 1) (fun i ->
+        let na = angle +. (float i *. 2. *. pi /. float nb) in
+        { x = sizelong *. cos na; y = sizelong *. sin na })
+  in
+  Array.to_list box
+
+exception Fin
+exception Echec
+exception Vide
+
+let get_available_speed_box speed constraints_one_acft =
+  let initbox = speedbox speed in
+  let box = ref initbox in
+  let delta = ref (-0.5) in
+  try
+    while true do
+      box := initbox;
+      try
+        List.iter
+          (fun (vecteur_to_edge, positive_direction_of_vecteur, flag) ->
+            let positive_unit_direction_of_vecteur =
+              Geom.resize_2d positive_direction_of_vecteur
+                (Geom.norm_2d vecteur_to_edge)
+            in
+            let relaxed_limited_speed_to_edge =
+              let speed_reach_the_edge =
+                Geom.diff_2d speed (Geom.opp_2d vecteur_to_edge)
+              in
+              if flag then
+                Geom.diff_2d speed_reach_the_edge
+                  (Geom.resize_2d positive_unit_direction_of_vecteur
+                     (1. /. !delta))
+              else Geom.diff_2d speed_reach_the_edge Geom.default_t
+            in
+            box :=
+              Geom.cutting_border relaxed_limited_speed_to_edge
+                positive_direction_of_vecteur !box)
+          constraints_one_acft;
+        raise Fin
+      with Vide ->
+        delta := !delta +. 0.1;
+        if !delta > 20000. then raise Echec
+    done
+  with Fin -> ()
+
 let run =
   let flag_fin = ref 0 in
   let acfts = !Aircraft.acft_lst in
@@ -239,5 +291,12 @@ let run =
         get_constraints_obstacle i acfts constraints)
     done;
 
+    let boites = Array.init dim (fun i -> []) in
+    for i = 0 to dim - 1 do
+      let targetbox =
+        get_available_speed_box (List.nth acfts i).speed constraints.(i)
+      in
+      ()
+    done;
     move_all Const.dim acfts flag_fin
   done

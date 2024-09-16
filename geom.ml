@@ -41,7 +41,9 @@ let opp_2d (v : t) = create_t (-.v.x) (-.v.y)
 let vectoriel_three_point_2d (p1 : t) (p0 : t) (p2 : t) =
   vectoriel_2d (diff_2d p1 p0) (diff_2d p2 p0)
 
-let normal_pass_o_2d (a : t) (b : t) = { x = a.y -. b.y; y = b.x -. a.x }
+let normal_vecteur_for_two_point_2d (a : t) (b : t) =
+  { x = a.y -. b.y; y = b.x -. a.x }
+
 let resize_2d (a : t) (num : float) = { x = a.x /. num; y = a.y /. num }
 
 let is_inside a l =
@@ -122,6 +124,10 @@ let projecton_point_to_vector c a v =
 exception Droites_confondues
 exception No_solution
 
+(* pa -> point a
+   na -> normal vector a
+   pb -> point b
+   nb -> normal vector b *)
 let intersection_point_of_two_line pa na pb nb =
   (* 判断两条直线是否平行或垂直 *)
   (* 判断两个法向向量是否方向相同 *)
@@ -147,3 +153,55 @@ let intersection_point_of_two_line pa na pb nb =
       x = vectoriel_2d (create_t ca na.y) (create_t cb nb.y) /. d;
       y = vectoriel_2d (create_t na.x ca) (create_t nb.x cb) /. d;
     }
+
+exception Vide
+
+(* 使cadre首尾相接 *)
+let complete cadre =
+  match cadre with
+  | [] -> []
+  | deb :: tl -> (
+      match List.rev tl with
+      | [] -> cadre
+      | fin :: _ -> if deb = fin then cadre else fin :: cadre)
+
+let cutting_border point normal_vector cadre =
+  let intersection_border_speed last_node node point normal_vector =
+    intersection_point_of_two_line node
+      (normal_vecteur_for_two_point_2d last_node node)
+      point normal_vector
+  in
+  let get_flag a b v = scal_2d (diff_2d b a) v >= 0. in
+  let rec intersect point normal_vector cadre last_flag last_node result_list =
+    match cadre with
+    | [] -> (
+        match result_list with
+        | [] -> raise Vide
+        | _ -> complete (List.rev result_list))
+    | node :: tl ->
+        if point = node then
+          intersect point normal_vector tl last_flag node result_list
+        else
+          let flag = get_flag node point normal_vector in
+          if last_flag then
+            if flag then
+              intersect point normal_vector tl last_flag node
+                (node :: result_list)
+            else
+              let intersect_point =
+                intersection_border_speed last_node node point normal_vector
+              in
+              intersect point normal_vector tl false node
+                (intersect_point :: result_list)
+          else if flag then
+            let intersect_point =
+              intersection_border_speed last_node node point normal_vector
+            in
+            intersect point normal_vector tl true node
+              (node :: intersect_point :: result_list)
+          else intersect point normal_vector tl last_flag node result_list
+  in
+  match cadre with
+  | [] -> []
+  | hd :: tl ->
+      intersect point normal_vector tl (get_flag hd point normal_vector) hd []
