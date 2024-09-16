@@ -22,6 +22,14 @@ let scal_2d (a : t) (b : t) = (a.x *. b.x) +. (a.y *. b.y)
    = 0 -> 平行或者共线 *)
 let vectoriel_2d (a : t) (b : t) = (a.x *. b.y) -. (a.y *. b.x)
 
+(* p0 -> p1 向量 和 p0 -> p2 向量 做内积 *)
+let scal_three_point_2d (p1 : t) (p0 : t) (p2 : t) =
+  scal_2d (diff_2d p1 p0) (diff_2d p2 p0)
+
+(* p0 -> p1 向量 和 p0 -> p2 向量 做外积 *)
+let vectoriel_three_point_2d (p1 : t) (p0 : t) (p2 : t) =
+  vectoriel_2d (diff_2d p1 p0) (diff_2d p2 p0)
+
 (* retourne la norme et l'angle de a*)
 let norm_2d (a : t) = sqrt (scal_2d a a)
 let angle_2d (a : t) = atan2 a.y a.x
@@ -37,14 +45,17 @@ let find_cap_2d (p : t) (d : t) = atan2 (d.y -. p.y) (d.x -. p.x)
 (* 反向 *)
 let opp_2d (v : t) = create_t (-.v.x) (-.v.y)
 
-(* p0 -> p1 向量 和 p0 -> p2 向量 做外积 *)
-let vectoriel_three_point_2d (p1 : t) (p0 : t) (p2 : t) =
-  vectoriel_2d (diff_2d p1 p0) (diff_2d p2 p0)
-
 let normal_vecteur_for_two_point_2d (a : t) (b : t) =
   { x = a.y -. b.y; y = b.x -. a.x }
 
 let resize_2d (a : t) (num : float) = { x = a.x /. num; y = a.y /. num }
+
+(* 将一个向量 p 绕原点旋转一个角度 a，并将其长度乘以一个系数 k *)
+let rotate point angle =
+  let norm_point = norm_2d point and angle_point = angle_2d point in
+  create_t
+    (norm_point *. cos (angle_point +. angle))
+    (norm_point *. sin (angle_point +. angle))
 
 let is_inside a l =
   match l with
@@ -104,11 +115,12 @@ let extremes a l =
         (hd, hd) l
 
 let pi = acos (-1.)
+let infinity = 1. /. 0.
 
 (* 求的是c点到 过a点以v为向量的 直线的向量（方向指向c） *)
 (* d 是c点到 过a点以v为向量的 直线的距离 *)
 (* x,y 是 d 向量（指向c）的坐标 *)
-let projecton_point_to_vector c a v =
+let projection_point_to_vector c a v =
   if scal_2d v v = 0. then failwith "projection sur une droite sans direction";
   let ac = diff_2d c a in
   let alpha = angle_2d v in
@@ -117,6 +129,35 @@ let projecton_point_to_vector c a v =
     { x = d *. cos (alpha +. (pi /. 2.)); y = d *. sin (alpha +. (pi /. 2.)) }
   else
     { x = d *. cos (alpha -. (pi /. 2.)); y = d *. sin (alpha -. (pi /. 2.)) }
+
+(* 求的是c点到 ab 线段 的最小距离 以及 该点 *)
+(* 投影点不再 ab 之内时， 取 a 或 b 点 *)
+let projection_point_to_segment c a b =
+  let ab = diff_2d b a and ac = diff_2d c a and bc = diff_2d c b in
+  if scal_2d ab ab = 0. then (scal_2d ac ac, a)
+  else if scal_three_point_2d b a c <= 0. then (scal_2d ac ac, a)
+  else if scal_three_point_2d a b c <= 0. then (scal_2d bc bc, b)
+  else
+    let unit_ab = resize_2d ab (norm_2d ab) in
+    let distance = abs_float (vectoriel_three_point_2d b a c) /. norm_2d ab
+    and delta = abs_float (scal_three_point_2d b a c) /. norm_2d ab in
+    (distance, diff_2d a (resize_2d unit_ab (1. /. delta)))
+
+let projection_point_to_convex a convex =
+  let rec projection_each_edge a convex last_node distance project_point =
+    match convex with
+    | [] -> project_point
+    | node :: tl ->
+        let new_distance, new_project_point =
+          projection_point_to_segment a last_node node
+        in
+        if new_distance < distance then
+          projection_each_edge a tl node new_distance new_project_point
+        else projection_each_edge a tl node distance project_point
+  in
+  match convex with
+  | [] -> failwith "convex vide"
+  | hd :: tl -> projection_each_edge a convex hd infinity hd
 
 (* pa -> a 直线上任意一点
    na -> a 直线法向向量

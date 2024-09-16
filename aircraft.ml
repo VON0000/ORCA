@@ -8,7 +8,7 @@ exception Exit
 type t = {
   mutable position : Geom.t;
   dest : Geom.t;
-  speed : Geom.t;
+  mutable speed : Geom.t;
   mutable speedopt : Geom.t;
   route : Geom.t list;
   mutable active : bool;
@@ -67,11 +67,11 @@ let def_dest id exist_acft =
 
 let def_speed (position : Geom.t) (dest : Geom.t) =
   let angle = Geom.heading_angle position dest in
-  Geom.create_t (Const.speed *. cos angle) (Const.speed *. sin angle)
+  Geom.create_t (Const.const_speed *. cos angle) (Const.const_speed *. sin angle)
 
 let def_speedopt position dest =
   let cap = Geom.find_cap_2d position dest in
-  Geom.create_t (Const.speed *. cos cap) (Const.speed *. sin cap)
+  Geom.create_t (Const.const_speed *. cos cap) (Const.const_speed *. sin cap)
 
 let create id (exist_acft : t list ref) =
   let position = def_position id exist_acft in
@@ -92,7 +92,7 @@ let create id (exist_acft : t list ref) =
 
 let update_speedopt acft =
   let cap = Geom.find_cap_2d acft.position acft.dest in
-  Geom.create_t (Const.speed *. cos cap) (Const.speed *. sin cap)
+  Geom.create_t (Const.const_speed *. cos cap) (Const.const_speed *. sin cap)
 
 let get_position acft = acft.position
 let get_dest acft = acft.dest

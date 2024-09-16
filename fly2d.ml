@@ -175,7 +175,7 @@ let get_constraints_entre_avions i acfts constraints =
    此时返回的速度指向障碍物边缘点与当前位置的外侧 *)
 let get_delta_speed previ local_acft d g =
   let delta_v_droite =
-    Geom.projecton_point_to_vector previ local_acft.position
+    Geom.projection_point_to_vector previ local_acft.position
       (Geom.diff_2d d local_acft.position)
   in
   let angle_ext_position_d =
@@ -187,7 +187,7 @@ let get_delta_speed previ local_acft d g =
       (sin (angle_ext_position_d -. (Geom.pi /. 2.)))
   in
   let delta_v_gauche =
-    Geom.projecton_point_to_vector previ local_acft.position
+    Geom.projection_point_to_vector previ local_acft.position
       (Geom.diff_2d g local_acft.position)
   in
   let angle_ext_position_g =
@@ -249,7 +249,7 @@ let get_available_speed_box speed constraints_one_acft =
   let initbox = speedbox speed in
   let box = ref initbox in
   let delta = ref (-0.5) in
-  try
+  (try
     while true do
       box := initbox;
       try
@@ -278,7 +278,17 @@ let get_available_speed_box speed constraints_one_acft =
         delta := !delta +. 0.1;
         if !delta > 20000. then raise Echec
     done
-  with Fin -> ()
+  with Fin -> ());
+  !box 
+
+let get_available_speed speed speedbox =
+  let newspeed =
+    if Geom.is_inside speed speedbox then speed
+    else Geom.projection_point_to_convex speed speedbox
+  in
+  if Geom.norm_2d newspeed > Const.const_speed /. 5. then newspeed
+  else
+    Geom.projection_point_to_convex (Geom.resize_2d speed 1.) speedbox
 
 let run =
   let flag_fin = ref 0 in
@@ -296,7 +306,10 @@ let run =
       let targetbox =
         get_available_speed_box (List.nth acfts i).speed constraints.(i)
       in
-      ()
+
+      let new_speed = get_available_speed (List.nth acfts i).speed targetbox in 
+      (List.nth acfts i).speed <- new_speed;
+      boites.(i) <- targetbox
     done;
     move_all Const.dim acfts flag_fin
   done

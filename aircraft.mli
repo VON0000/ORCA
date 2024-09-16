@@ -1,7 +1,7 @@
 type t = {
   mutable position : Geom.t;
   dest : Geom.t;
-  speed : Geom.t;
+  mutable speed : Geom.t;
   mutable speedopt : Geom.t;
   route : Geom.t list;
   mutable active : bool;

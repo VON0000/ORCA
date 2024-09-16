@@ -65,7 +65,7 @@ let get_speed () =
     Printf.printf "invalid input of the speed of drones\n";
     exit 1
 
-let speed = get_speed ()
+let const_speed = get_speed ()
 
 let get_pas () =
   (* 打印提示信息 *)
