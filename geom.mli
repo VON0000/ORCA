@@ -22,4 +22,7 @@ val extremes : t -> t list -> t * t
 val pi : float
 val projection_point_to_vector : t -> t -> t -> t
 val projection_point_to_convex : t -> t list -> t
+
+exception Vide
+
 val cutting_border : t -> t -> t list -> t list

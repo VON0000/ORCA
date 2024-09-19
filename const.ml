@@ -15,7 +15,8 @@ let get_sep () =
        invalide\n";
     exit 1
 
-let sep = get_sep ()
+(* let sep = get_sep () *)
+let sep = 5.
 
 let get_norme () =
   (* 打印提示信息 *)
@@ -31,7 +32,8 @@ let get_norme () =
     Printf.printf "L'entrée de la demi norme de separation est invalide\n";
     exit 1
 
-let norme = get_norme ()
+(* let norme = get_norme () *)
+let norme = 2.5
 let norme2 = 4. *. norme *. norme (*norme de separation au carré*)
 
 (* nb de drones *)
@@ -49,7 +51,8 @@ let get_dim () =
     Printf.printf "invalid input of the number of drones\n";
     exit 1
 
-let dim = get_dim ()
+(* let dim = get_dim () *)
+let dim = 10
 
 let get_speed () =
   (* 打印提示信息 *)
@@ -65,7 +68,8 @@ let get_speed () =
     Printf.printf "invalid input of the speed of drones\n";
     exit 1
 
-let const_speed = get_speed ()
+(* let const_speed = get_speed () *)
+let const_speed = 1.
 
 let get_pas () =
   (* 打印提示信息 *)
@@ -81,7 +85,7 @@ let get_pas () =
     Printf.printf "invalid input of the speed of drones\n";
     exit 1
 
-let pas = get_pas ()
+(* let pas = get_pas () *)
+let pas = 1.
 let tau = 60. (*horizon en secondes*)
-
 let epsilon = 0.0

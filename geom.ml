@@ -177,13 +177,13 @@ let intersection_point_of_two_line pa na pb nb =
     let pr = diff_2d nb na in
     (* 判断两条直线是否共线 *)
     if abs_float (scal_2d pr na) < Const.epsilon then (
-      Printf.printf "pr=%f %f\n" pr.x pr.y;
-      Printf.printf "na=%f %f\n" na.x na.y;
+      Printf.printf "Droites_confondues pr=%f %f\n" pr.x pr.y;
+      Printf.printf "Droites_confondues na=%f %f\n" na.x na.y;
       flush stdout;
       raise Droites_confondues)
     else (
-      Printf.printf "pr=%f %f\n" pr.x pr.y;
-      Printf.printf "na=%f %f\n" na.x na.y;
+      Printf.printf "No_solution pr=%f %f\n" pr.x pr.y;
+      Printf.printf "No_solution na=%f %f\n" na.x na.y;
       flush stdout;
       raise No_solution)
   else
@@ -207,17 +207,20 @@ let complete cadre =
       | fin :: _ -> if deb = fin then cadre else fin :: cadre)
 
 let cutting_border point normal_vector cadre =
+  (* Printf.printf "point normal %f %f %f %f %d \n" point.x point.y normal_vector.x
+    normal_vector.y (List.length cadre); *)
   let intersection_border_speed last_node node point normal_vector =
     intersection_point_of_two_line node
       (normal_vecteur_for_two_point_2d last_node node)
       point normal_vector
   in
-  let get_flag a b v = scal_2d (diff_2d b a) v >= 0. in
+  let get_flag a b v = scal_2d (diff_2d a b) v >= 0. in
   let rec intersect point normal_vector cadre last_flag last_node result_list =
     match cadre with
     | [] -> (
         match result_list with
-        | [] -> raise Vide
+        | [] ->
+            raise Vide
         | _ -> complete (List.rev result_list))
     | node :: tl ->
         if point = node then
@@ -245,4 +248,14 @@ let cutting_border point normal_vector cadre =
   match cadre with
   | [] -> []
   | hd :: tl ->
+      (* Printf.printf "cadre:%d\n" (List.length cadre);
+
+      let nb = ref (List.length cadre) and i = ref 0 in
+      while !nb > 0 do
+        let temp = List.nth cadre !i in
+        Printf.printf "%f %f\n" temp.x temp.y;
+        nb := !nb - 1;
+        i := !i + 1
+      done;
+      Printf.printf "\n"; *)
       intersect point normal_vector tl (get_flag hd point normal_vector) hd []

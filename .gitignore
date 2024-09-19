@@ -39,3 +39,6 @@ _opam/
 
 # vscode settings
 .vscode
+
+# output
+*.

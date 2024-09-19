@@ -7,10 +7,10 @@ OCAMLDOC = ocamldoc -html
 #CONTRAINTES = ./contraintes_coop
 INCLUDES = -I .
 #LIBS_USR = facile.cma
-#LIBS_OPAM = -package zmq
+LIBS_OPAM = -package unix
 #LIBS_OPT = $(LIBS_USR:.cma=.cmxa)
 #LIBS_BIN = $(LIBS_USR)
-SCML = const.ml geom.ml env.ml aircraft.ml fly2d.ml
+SCML = const.ml geom.ml env.ml aircraft.ml plot.ml fly2d.ml
 SCCMO = $(SCML:.ml=.cmo)
 SCCMX = $(SCML:.ml=.cmx)
 all: opt
@@ -19,7 +19,7 @@ opt: orca.opt
 orca.out: $(SCCMO)
 	$(OCAMLC) -o $@ $(SCCMO)
 orca.opt: $(SCCMX)
-	$(OCAMLOPT) -o $@ $(SCCMX)
+	$(OCAMLOPT) -linkpkg $(LIBS_OPAM) -o $@ $(SCCMX)
 DIRS = sol reduced
 .SUFFIXES: .ml .mli .cmi .cmo .cmx
 .mli.cmi:
