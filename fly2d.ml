@@ -78,7 +78,7 @@ let get_smallest_change_to_edge_for_sectoral_area relative_speed
         /. norm_vecteur_de_centre_of_small_circle_a_relative_speed /. 2.))
   in
   (* Printf.printf "cons %f %f %f\n" direction_smallest_change.x
-    direction_smallest_change.y distance_to_edge; *)
+     direction_smallest_change.y distance_to_edge; *)
   if distance_to_edge >= 0. then
     (direction_smallest_change, direction_smallest_change)
   else (direction_smallest_change, Geom.opp_2d direction_smallest_change)
@@ -256,14 +256,14 @@ let get_available_speed_box speed constraints_one_acft =
      while true do
        box := initbox;
        (* Printf.printf "box:%d\n" (List.length !box);
-       Printf.printf "speed %f %f\n" speed.x speed.y; *)
+          Printf.printf "speed %f %f\n" speed.x speed.y; *)
        try
          List.iter
            (fun (vecteur_to_edge, positive_direction_of_vecteur, flag) ->
              (* Printf.printf "vecteur_to_edge %f %f\n" vecteur_to_edge.x
-               vecteur_to_edge.y;
-             Printf.printf "positive_direction_of_vecteur %f %f\n"
-               positive_direction_of_vecteur.x positive_direction_of_vecteur.y; *)
+                  vecteur_to_edge.y;
+                Printf.printf "positive_direction_of_vecteur %f %f\n"
+                  positive_direction_of_vecteur.x positive_direction_of_vecteur.y; *)
              let positive_unit_direction_of_vecteur =
                Geom.resize_2d positive_direction_of_vecteur
                  (Geom.norm_2d vecteur_to_edge)
@@ -279,11 +279,11 @@ let get_available_speed_box speed constraints_one_acft =
                else Geom.diff_2d speed_reach_the_edge Geom.default_t
              in
              (* Printf.printf "positive_unit_direction_of_vecteur %f %f\n"
-               positive_unit_direction_of_vecteur.x
-               positive_unit_direction_of_vecteur.y;
-             Printf.printf "relaxed_limited_speed_to_edge %f %f %f\n"
-               relaxed_limited_speed_to_edge.x relaxed_limited_speed_to_edge.y
-               !delta; *)
+                  positive_unit_direction_of_vecteur.x
+                  positive_unit_direction_of_vecteur.y;
+                Printf.printf "relaxed_limited_speed_to_edge %f %f %f\n"
+                  relaxed_limited_speed_to_edge.x relaxed_limited_speed_to_edge.y
+                  !delta; *)
              box :=
                Geom.cutting_border relaxed_limited_speed_to_edge
                  positive_direction_of_vecteur !box)
@@ -325,12 +325,16 @@ let () =
 
       let new_speed = get_available_speed (List.nth acfts i).speed targetbox in
       (List.nth acfts i).speed <- new_speed;
+      (* Printf.printf "new_speed %f %f\n" new_speed.x new_speed.y; *)
+      Printf.printf "point %f %f\n" (List.nth acfts i).position.x (List.nth acfts i).position.y;
       boites.(i) <- targetbox;
-      Printf.printf "\027[31m Finish successfully \027[0m \n"
+      (* Printf.printf "\027[31m Finish successfully \027[0m \n" *)
     done;
-    Printf.printf "\027[32m Finish successfully \027[0m \n";
+    (* Printf.printf "\027[32m Finish successfully \027[0m \n"; *)
     if !time mod step = 0 then Plot.output acfts boites;
     Plot.plot_to_screen;
     move_all Const.dim acfts flag_fin;
+    Printf.printf "\027[32m %d \027[0m \n" !time;
     incr time
-  done
+  done;
+  let _=Unix.select [] [] [] 10. in flush Plot.outc;
