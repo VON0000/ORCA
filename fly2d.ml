@@ -5,7 +5,7 @@ open Const
 open Plot
 
 let sizelong = 1. *. pas (*manoeuvrabilité longitudinale*)
-let fichmem = open_out "memory"
+let fichmem = open_out "./results/memory"
 let is_stop dim fin = if fin < dim then true else false
 
 (*mesure de la distance totale*)
@@ -37,8 +37,8 @@ let get_smallest_change_to_edge_for_non_sectoral_area relative_speed
       in
       ( angle_entre_relative_speed_et_right_edge,
         Geom.create_t
-          (cos (angle_entre_relative_speed_et_right_edge -. (pi /. 2.)) /. 2.)
-          (sin (angle_entre_relative_speed_et_right_edge -. (pi /. 2.)) /. 2.)
+          (cos (angle_edge_right -. (pi /. 2.)) /. 2.)
+          (sin (angle_edge_right -. (pi /. 2.)) /. 2.)
       )
     else
       let angle_entre_relative_speed_et_left_edge =
@@ -46,8 +46,8 @@ let get_smallest_change_to_edge_for_non_sectoral_area relative_speed
       in
       ( angle_entre_relative_speed_et_left_edge,
         Geom.create_t
-          (cos (angle_entre_relative_speed_et_left_edge +. (pi /. 2.)) /. 2.)
-          (sin (angle_entre_relative_speed_et_left_edge +. (pi /. 2.)) /. 2.) )
+          (cos (angle_edge_left +. (pi /. 2.)) /. 2.)
+          (sin (angle_edge_left +. (pi /. 2.)) /. 2.) )
   in
 
   let norm_smallest_change =
@@ -239,7 +239,7 @@ let speedbox speed =
   let angle = Geom.angle_2d speed in
   let box =
     Array.init (nb + 1) (fun i ->
-        let na = angle +. (float i *. 2. *. pi /. float nb) in
+        let na = angle +. (float i) *. 2. *. pi /. float nb in
         { x = sizelong *. cos na; y = sizelong *. sin na })
   in
   Array.to_list box
@@ -309,6 +309,10 @@ let () =
   let time = ref 0 in
   let step = 10 (*pas de temps affichage *) in
   let acfts = !Aircraft.acft_lst in
+
+  Plot.output_routes acfts;
+  Plot.output_obstacle;
+
   while is_stop Const.dim !flag_fin do
     let constraints = Array.init dim (fun i -> []) in
     for i = 0 to dim - 1 do
@@ -324,17 +328,25 @@ let () =
       in
 
       let new_speed = get_available_speed (List.nth acfts i).speed targetbox in
+      Printf.printf "speed %f %f\n" (List.nth acfts i).speed.x (List.nth acfts i).speed.y;
       (List.nth acfts i).speed <- new_speed;
-      (* Printf.printf "new_speed %f %f\n" new_speed.x new_speed.y; *)
-      Printf.printf "point %f %f\n" (List.nth acfts i).position.x (List.nth acfts i).position.y;
-      boites.(i) <- targetbox;
+      Printf.printf "new_speed %f %f\n" new_speed.x new_speed.y;
+      Printf.printf "point %f %f\n" (List.nth acfts i).position.x
+        (List.nth acfts i).position.y;
+      Printf.printf "dest %f %f\n" (List.nth acfts i).dest.x
+        (List.nth acfts i).dest.y;
+      boites.(i) <- targetbox
       (* Printf.printf "\027[31m Finish successfully \027[0m \n" *)
     done;
     (* Printf.printf "\027[32m Finish successfully \027[0m \n"; *)
-    if !time mod step = 0 then Plot.output acfts boites;
-    Plot.plot_to_screen;
+    if !time mod step = 0 then (
+      Plot.output acfts boites;
+      Plot.plot_to_screen);
     move_all Const.dim acfts flag_fin;
-    Printf.printf "\027[32m %d \027[0m \n" !time;
-    incr time
+    Printf.printf "\027[32m time: %d \027[0m \n" !time;
+    Printf.printf "\027[32m flag_fin: %d \027[0m \n" !flag_fin;
+    incr time;
+    if !time = 190 then exit 1
   done;
-  let _=Unix.select [] [] [] 10. in flush Plot.outc;
+  let _ = Unix.select [] [] [] 10. in
+  flush Plot.outc

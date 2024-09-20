@@ -39,9 +39,6 @@ let dist2_2d (a : t) (b : t) =
   let dx = a.x -. b.x and dy = a.y -. b.y in
   (dx *. dx) +. (dy *. dy)
 
-(* p到d的角度 *)
-let find_cap_2d (p : t) (d : t) = atan2 (d.y -. p.y) (d.x -. p.x)
-
 (* 反向 *)
 let opp_2d (v : t) = create_t (-.v.x) (-.v.y)
 
@@ -125,10 +122,11 @@ let projection_point_to_vector c a v =
   let ac = diff_2d c a in
   let alpha = angle_2d v in
   let d = vectoriel_2d ac v /. norm_2d v in
-  if angle_2d ac > angle_2d v then
-    { x = d *. cos (alpha +. (pi /. 2.)); y = d *. sin (alpha +. (pi /. 2.)) }
-  else
-    { x = d *. cos (alpha -. (pi /. 2.)); y = d *. sin (alpha -. (pi /. 2.)) }
+  (* if angle_2d ac > angle_2d v then
+       { x = d *. cos (alpha +. (pi /. 2.)); y = d *. sin (alpha +. (pi /. 2.)) }
+     else
+       { x = d *. cos (alpha -. (pi /. 2.)); y = d *. sin (alpha -. (pi /. 2.)) } *)
+  { x = d *. cos (alpha +. (pi /. 2.)); y = d *. sin (alpha +. (pi /. 2.)) }
 
 (* 求的是c点到 ab 线段 的最小距离 以及 该点 *)
 (* 投影点不再 ab 之内时， 取 a 或 b 点 *)
@@ -141,7 +139,7 @@ let projection_point_to_segment c a b =
     let unit_ab = resize_2d ab (norm_2d ab) in
     let distance = abs_float (vectoriel_three_point_2d b a c) /. norm_2d ab
     and delta = abs_float (scal_three_point_2d b a c) /. norm_2d ab in
-    (distance, diff_2d a (resize_2d unit_ab (1. /. delta)))
+    (distance, diff_2d a (resize_2d (opp_2d unit_ab) (1. /. delta)))
 
 let projection_point_to_convex a convex =
   let rec projection_each_edge a convex last_node distance project_point =

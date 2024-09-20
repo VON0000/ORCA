@@ -70,7 +70,7 @@ let def_speed (position : Geom.t) (dest : Geom.t) =
   Geom.create_t (Const.const_speed *. cos angle) (Const.const_speed *. sin angle)
 
 let def_speedopt position dest =
-  let cap = Geom.find_cap_2d position dest in
+  let cap = Geom.heading_angle position dest in
   Geom.create_t (Const.const_speed *. cos cap) (Const.const_speed *. sin cap)
 
 let create id (exist_acft : t list ref) =
@@ -91,7 +91,7 @@ let create id (exist_acft : t list ref) =
   acft
 
 let update_speedopt acft =
-  let cap = Geom.find_cap_2d acft.position acft.dest in
+  let cap = Geom.heading_angle acft.position acft.dest in
   Geom.create_t (Const.const_speed *. cos cap) (Const.const_speed *. sin cap)
 
 let get_position acft = acft.position

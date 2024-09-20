@@ -9,8 +9,8 @@ let dscreen = 50 + truncate radius
 (* truncate 取整*)
 let delai = 0.5 (*delai pour ralentir l'affichage*)
 
-let output acfts boites =
-  let fichroutes = open_out "routes" in
+let output_routes acfts =
+  let fichroutes = open_out "./results/routes" in
   for i = 0 to Const.dim - 1 do
     List.iter
       (fun p -> Printf.fprintf fichroutes "%f %f\n" p.x p.y)
@@ -18,8 +18,21 @@ let output acfts boites =
     Printf.fprintf fichroutes "\n"
   done;
   close_out fichroutes;
+  ()
 
-  let fichobstacle = open_out "obstacle" in
+let output_obstacle =
+  let fichobstacle = open_out "./results/obstacle" in
+  for i = 0 to Array.length Env.obstacle - 1 do
+    List.iter
+      (fun p -> Printf.fprintf fichobstacle "%f %f\n" p.x p.y)
+      Env.obstacle.(i);
+    Printf.fprintf fichobstacle "\n"
+  done;
+  close_out fichobstacle;
+  ()
+
+let output acfts boites =
+  let fichobstacle = open_out "./results/obstacle" in
   for i = 0 to Array.length Env.obstacle - 1 do
     List.iter
       (fun p -> Printf.fprintf fichobstacle "%f %f\n" p.x p.y)
@@ -29,10 +42,10 @@ let output acfts boites =
   close_out fichobstacle;
 
   let coeff = 50. (*zoom d'affichage des rayons des vitesse*) in
-  let fichp = open_out "points" in
-  let fichb = open_out "boites" in
-  let fichs = open_out "speeds" in
-  let fichns = open_out "newspeeds" in
+  let fichp = open_out "./results/points" in
+  let fichb = open_out "./results/boites" in
+  let fichs = open_out "./results/speeds" in
+  let fichns = open_out "./results/newspeeds" in
   for i = 0 to Const.dim - 1 do
     let local_acft = List.nth acfts i in
     if local_acft.active then (
@@ -55,7 +68,7 @@ let output acfts boites =
             ((y *. coeff) +. local_acft.position.y))
         boites.(i);
       Printf.fprintf fichb "\n";
-      flush fichb;)
+      flush fichb)
   done;
   close_out fichp;
   close_out fichb;
@@ -63,24 +76,25 @@ let output acfts boites =
   close_out fichns;
   ()
 
-let output_memory acfts = 
-  let fichmem = open_out "memory" in
-  for i = 0 to Const.dim - 1 do
-    let local_acft = List.nth acfts i in
-    if local_acft.active then (
-      Printf.fprintf fichmem "%f %f\n" local_acft.position.x local_acft.position.y;
-      flush fichmem;)
-  done;
-  close_out fichmem;
-  ()
-  
+(* let output_memory acfts =
+   let fichmem = open_out "./results/memory" in
+   for i = 0 to Const.dim - 1 do
+     let local_acft = List.nth acfts i in
+     if local_acft.active then (
+       Printf.fprintf fichmem "%f %f\n" local_acft.position.x
+         local_acft.position.y;
+       flush fichmem)
+   done;
+   close_out fichmem;
+   () *)
 
 (* 利用gnuplot绘图 *)
 let plot_to_screen =
   Printf.fprintf outc
-    "plot [-%d:%d][-%d:%d] 'obstacle' not w l lw 3,'points' not pt 7 ps \
-     2,'speeds' w l,'newspeeds' w l,'routes' lc 4 w l,'boites' w l,'memory' \
-     not w l lc 3\n"
+    "plot [-%d:%d][-%d:%d] './results/obstacle' not w l lw \
+     3,'./results/points' not pt 7 ps 2,'./results/speeds' w \
+     l,'./results/newspeeds' w l,'./results/routes' lc 4 w \
+     l,'./results/boites' w l,'./results/memory' not w l lc 3\n"
     dscreen dscreen dscreen dscreen;
   flush outc;
   let _ = Unix.select [] [] [] delai in
