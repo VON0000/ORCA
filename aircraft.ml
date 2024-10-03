@@ -30,7 +30,7 @@ let judge_exist exist_list (position : Geom.t) =
         raise Exit)
     done;
     !flag
-  with Exit -> false
+  with Exit -> !flag
 
 let def_position id exist_acft =
   let existing_positions = List.map (fun x -> x.position) !exist_acft in
@@ -111,7 +111,7 @@ let get_acft_lst dim =
   done;
 
   (* 返回生成的 acft 数组 *)
-  acfts
+  List.rev !acfts
 
 let acft_lst = get_acft_lst Const.dim
 let pas = 1. (*pas de temps*)

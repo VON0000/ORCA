@@ -132,9 +132,9 @@ let projection_point_to_vector c a v =
 (* 投影点不再 ab 之内时， 取 a 或 b 点 *)
 let projection_point_to_segment c a b =
   let ab = diff_2d b a and ac = diff_2d c a and bc = diff_2d c b in
-  if scal_2d ab ab = 0. then (scal_2d ac ac, a)
-  else if scal_three_point_2d b a c <= 0. then (scal_2d ac ac, a)
-  else if scal_three_point_2d a b c <= 0. then (scal_2d bc bc, b)
+  if scal_2d ab ab = 0. then (norm_2d ac, a)
+  else if scal_three_point_2d b a c <= 0. then (norm_2d ac, a)
+  else if scal_three_point_2d a b c <= 0. then (norm_2d bc, b)
   else
     let unit_ab = resize_2d ab (norm_2d ab) in
     let distance = abs_float (vectoriel_three_point_2d b a c) /. norm_2d ab

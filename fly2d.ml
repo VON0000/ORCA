@@ -38,8 +38,7 @@ let get_smallest_change_to_edge_for_non_sectoral_area relative_speed
       ( angle_entre_relative_speed_et_right_edge,
         Geom.create_t
           (cos (angle_edge_right -. (pi /. 2.)) /. 2.)
-          (sin (angle_edge_right -. (pi /. 2.)) /. 2.)
-      )
+          (sin (angle_edge_right -. (pi /. 2.)) /. 2.) )
     else
       let angle_entre_relative_speed_et_left_edge =
         angle_edge_left -. angle_relative_speed
@@ -68,7 +67,7 @@ let get_smallest_change_to_edge_for_sectoral_area relative_speed
     Geom.norm_2d vecteur_de_centre_of_small_circle_a_relative_speed
   in
   let distance_to_edge =
-    (2. *. norme /. Const.tau)
+    (2. *. Const.norme /. Const.tau)
     -. norm_vecteur_de_centre_of_small_circle_a_relative_speed
   in
   let direction_smallest_change =
@@ -77,8 +76,7 @@ let get_smallest_change_to_edge_for_sectoral_area relative_speed
       /. (distance_to_edge
         /. norm_vecteur_de_centre_of_small_circle_a_relative_speed /. 2.))
   in
-  (* Printf.printf "cons %f %f %f\n" direction_smallest_change.x
-     direction_smallest_change.y distance_to_edge; *)
+  Printf.printf "relative_speed %f %f\n" relative_speed.x relative_speed.y;
   if distance_to_edge >= 0. then
     (direction_smallest_change, direction_smallest_change)
   else (direction_smallest_change, Geom.opp_2d direction_smallest_change)
@@ -239,7 +237,7 @@ let speedbox speed =
   let angle = Geom.angle_2d speed in
   let box =
     Array.init (nb + 1) (fun i ->
-        let na = angle +. (float i) *. 2. *. pi /. float nb in
+        let na = angle +. (float i *. 2. *. pi /. float nb) in
         { x = sizelong *. cos na; y = sizelong *. sin na })
   in
   Array.to_list box
@@ -255,15 +253,9 @@ let get_available_speed_box speed constraints_one_acft =
   (try
      while true do
        box := initbox;
-       (* Printf.printf "box:%d\n" (List.length !box);
-          Printf.printf "speed %f %f\n" speed.x speed.y; *)
        try
          List.iter
            (fun (vecteur_to_edge, positive_direction_of_vecteur, flag) ->
-             (* Printf.printf "vecteur_to_edge %f %f\n" vecteur_to_edge.x
-                  vecteur_to_edge.y;
-                Printf.printf "positive_direction_of_vecteur %f %f\n"
-                  positive_direction_of_vecteur.x positive_direction_of_vecteur.y; *)
              let positive_unit_direction_of_vecteur =
                Geom.resize_2d positive_direction_of_vecteur
                  (Geom.norm_2d vecteur_to_edge)
@@ -278,12 +270,6 @@ let get_available_speed_box speed constraints_one_acft =
                       (1. /. !delta))
                else Geom.diff_2d speed_reach_the_edge Geom.default_t
              in
-             (* Printf.printf "positive_unit_direction_of_vecteur %f %f\n"
-                  positive_unit_direction_of_vecteur.x
-                  positive_unit_direction_of_vecteur.y;
-                Printf.printf "relaxed_limited_speed_to_edge %f %f %f\n"
-                  relaxed_limited_speed_to_edge.x relaxed_limited_speed_to_edge.y
-                  !delta; *)
              box :=
                Geom.cutting_border relaxed_limited_speed_to_edge
                  positive_direction_of_vecteur !box)
@@ -296,19 +282,20 @@ let get_available_speed_box speed constraints_one_acft =
    with Fin -> ());
   !box
 
-let get_available_speed speed speedbox =
+let get_available_speed speed speedopt speedbox =
   let newspeed =
-    if Geom.is_inside speed speedbox then speed
-    else Geom.projection_point_to_convex speed speedbox
+    if Geom.is_inside speedopt speedbox then speed
+    else Geom.projection_point_to_convex speedopt speedbox
   in
   if Geom.norm_2d newspeed > Const.const_speed /. 5. then newspeed
+  else if Geom.is_inside speed speedbox then speed
   else Geom.projection_point_to_convex (Geom.resize_2d speed 1.) speedbox
 
 let () =
   let flag_fin = ref 0 in
   let time = ref 0 in
   let step = 10 (*pas de temps affichage *) in
-  let acfts = !Aircraft.acft_lst in
+  let acfts = Aircraft.acft_lst in
 
   Plot.output_routes acfts;
   Plot.output_obstacle;
@@ -327,18 +314,10 @@ let () =
         get_available_speed_box (List.nth acfts i).speed constraints.(i)
       in
 
-      let new_speed = get_available_speed (List.nth acfts i).speed targetbox in
-      Printf.printf "speed %f %f\n" (List.nth acfts i).speed.x (List.nth acfts i).speed.y;
+      let new_speed = get_available_speed (List.nth acfts i).speed (List.nth acfts i).speedopt targetbox in
       (List.nth acfts i).speed <- new_speed;
-      Printf.printf "new_speed %f %f\n" new_speed.x new_speed.y;
-      Printf.printf "point %f %f\n" (List.nth acfts i).position.x
-        (List.nth acfts i).position.y;
-      Printf.printf "dest %f %f\n" (List.nth acfts i).dest.x
-        (List.nth acfts i).dest.y;
       boites.(i) <- targetbox
-      (* Printf.printf "\027[31m Finish successfully \027[0m \n" *)
     done;
-    (* Printf.printf "\027[32m Finish successfully \027[0m \n"; *)
     if !time mod step = 0 then (
       Plot.output acfts boites;
       Plot.plot_to_screen);
@@ -346,7 +325,6 @@ let () =
     Printf.printf "\027[32m time: %d \027[0m \n" !time;
     Printf.printf "\027[32m flag_fin: %d \027[0m \n" !flag_fin;
     incr time;
-    if !time = 190 then exit 1
   done;
   let _ = Unix.select [] [] [] 10. in
   flush Plot.outc
