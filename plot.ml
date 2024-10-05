@@ -31,6 +31,18 @@ let output_obstacle =
   close_out fichobstacle;
   ()
 
+(* 利用gnuplot绘图 *)
+let plot_to_screen =
+  Printf.fprintf outc
+    "plot [-%d:%d][-%d:%d] './results/obstacle' not w l lw \
+     3,'./results/points' not pt 7 ps 2,'./results/speeds' w \
+     l,'./results/newspeeds' w l,'./results/routes' lc 4 w \
+     l,'./results/boites' w l,'./results/memory' not w l lc 3\n"
+    dscreen dscreen dscreen dscreen;
+  flush outc;
+  let _ = Unix.select [] [] [] delai in
+  ()
+
 let output acfts boites =
   let fichobstacle = open_out "./results/obstacle" in
   for i = 0 to Array.length Env.obstacle - 1 do
@@ -74,6 +86,7 @@ let output acfts boites =
   close_out fichb;
   close_out fichs;
   close_out fichns;
+  plot_to_screen;
   ()
 
 (* let output_memory acfts =
@@ -87,15 +100,3 @@ let output acfts boites =
    done;
    close_out fichmem;
    () *)
-
-(* 利用gnuplot绘图 *)
-let plot_to_screen =
-  Printf.fprintf outc
-    "plot [-%d:%d][-%d:%d] './results/obstacle' not w l lw \
-     3,'./results/points' not pt 7 ps 2,'./results/speeds' w \
-     l,'./results/newspeeds' w l,'./results/routes' lc 4 w \
-     l,'./results/boites' w l,'./results/memory' not w l lc 3\n"
-    dscreen dscreen dscreen dscreen;
-  flush outc;
-  let _ = Unix.select [] [] [] delai in
-  ()

@@ -291,6 +291,9 @@ let get_available_speed speed speedopt speedbox =
   else if Geom.is_inside speed speedbox then speed
   else Geom.projection_point_to_convex (Geom.resize_2d speed 1.) speedbox
 
+let seed = truncate (Unix.time ())
+let _ = Random.init seed
+
 let () =
   let flag_fin = ref 0 in
   let time = ref 0 in
@@ -314,17 +317,18 @@ let () =
         get_available_speed_box (List.nth acfts i).speed constraints.(i)
       in
 
-      let new_speed = get_available_speed (List.nth acfts i).speed (List.nth acfts i).speedopt targetbox in
+      let new_speed =
+        get_available_speed (List.nth acfts i).speed (List.nth acfts i).speedopt
+          targetbox
+      in
       (List.nth acfts i).speed <- new_speed;
       boites.(i) <- targetbox
     done;
-    if !time mod step = 0 then (
-      Plot.output acfts boites;
-      Plot.plot_to_screen);
+    if !time mod step = 0 then Plot.output acfts boites;
     move_all Const.dim acfts flag_fin;
     Printf.printf "\027[32m time: %d \027[0m \n" !time;
     Printf.printf "\027[32m flag_fin: %d \027[0m \n" !flag_fin;
-    incr time;
+    incr time
   done;
   let _ = Unix.select [] [] [] 10. in
   flush Plot.outc
