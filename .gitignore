@@ -7,6 +7,8 @@
 *.cmx
 *.cmxs
 *.cmxa
+*.opt
+*.depend
 
 # ocamlbuild working directory
 _build/
@@ -37,3 +39,6 @@ _opam/
 
 # vscode settings
 .vscode
+
+# output
+results/

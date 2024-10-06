@@ -1,3 +1,5 @@
+open Geom
+
 let obstacle =
   [|
     List.rev
