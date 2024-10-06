@@ -32,18 +32,27 @@ let output_obstacle =
   ()
 
 (* 利用gnuplot绘图 *)
-let plot_to_screen =
+let plot_to_screen time =
+  Printf.fprintf outc "set terminal x11\n";
+  (* 使用 x11 作为终端 *)
+  Printf.fprintf outc "set xrange [-%d:%d]\n" dscreen dscreen;
+  Printf.fprintf outc "set yrange [-%d:%d]\n" dscreen dscreen;
+
+  (* 使用 replot 以确保图形能更新 *)
   Printf.fprintf outc
-    "plot [-%d:%d][-%d:%d] './results/obstacle' not w l lw \
-     3,'./results/points' not pt 7 ps 2,'./results/speeds' w \
-     l,'./results/newspeeds' w l,'./results/routes' lc 4 w \
-     l,'./results/boites' w l,'./results/memory' not w l lc 3\n"
-    dscreen dscreen dscreen dscreen;
+    "plot './results/obstacle' not w l lw 3, './results/points' not pt 7 ps \
+     2, './results/speeds' w l, './results/newspeeds' w l, './results/routes' \
+     lc 4 w l, './results/boites' w l, './results/memory' not w l lc 3\n";
+
   flush outc;
-  let _ = Unix.select [] [] [] delai in
+
+  (* 确保命令发送 *)
+
+  (* 添加短暂延时，确保图形有时间渲染 *)
+  Unix.sleep 1;
   ()
 
-let output acfts boites =
+let output acfts boites time =
   let fichobstacle = open_out "./results/obstacle" in
   for i = 0 to Array.length Env.obstacle - 1 do
     List.iter
@@ -86,7 +95,7 @@ let output acfts boites =
   close_out fichb;
   close_out fichs;
   close_out fichns;
-  plot_to_screen;
+  plot_to_screen time;
   ()
 
 (* let output_memory acfts =

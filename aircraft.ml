@@ -33,6 +33,7 @@ let judge_exist exist_list (position : Geom.t) =
   with Exit -> !flag
 
 let def_position id exist_acft =
+  Random.self_init ();
   let existing_positions = List.map (fun x -> x.position) !exist_acft in
   let rec generate_position () =
     let position =
@@ -50,6 +51,7 @@ let def_position id exist_acft =
   generate_position ()
 
 let def_dest id exist_acft =
+  Random.self_init ();
   let existing_dests = List.map (fun x -> x.dest) !exist_acft in
   let rec generate_dest () =
     let dest =

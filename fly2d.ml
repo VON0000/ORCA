@@ -76,7 +76,6 @@ let get_smallest_change_to_edge_for_sectoral_area relative_speed
       /. (distance_to_edge
         /. norm_vecteur_de_centre_of_small_circle_a_relative_speed /. 2.))
   in
-  Printf.printf "relative_speed %f %f\n" relative_speed.x relative_speed.y;
   if distance_to_edge >= 0. then
     (direction_smallest_change, direction_smallest_change)
   else (direction_smallest_change, Geom.opp_2d direction_smallest_change)
@@ -324,7 +323,9 @@ let () =
       (List.nth acfts i).speed <- new_speed;
       boites.(i) <- targetbox
     done;
-    if !time mod step = 0 then Plot.output acfts boites;
+    if !time mod step = 0 then (
+      Plot.output acfts boites !time;
+      flush Plot.outc);
     move_all Const.dim acfts flag_fin;
     Printf.printf "\027[32m time: %d \027[0m \n" !time;
     Printf.printf "\027[32m flag_fin: %d \027[0m \n" !flag_fin;
