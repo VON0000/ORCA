@@ -283,7 +283,7 @@ let get_available_speed_box speed constraints_one_acft =
 
 let get_available_speed speed speedopt speedbox =
   let newspeed =
-    if Geom.is_inside speedopt speedbox then speed
+    if Geom.is_inside speedopt speedbox then speedopt
     else Geom.projection_point_to_convex speedopt speedbox
   in
   if Geom.norm_2d newspeed > Const.const_speed /. 5. then newspeed
@@ -329,7 +329,8 @@ let () =
     move_all Const.dim acfts flag_fin;
     Printf.printf "\027[32m time: %d \027[0m \n" !time;
     Printf.printf "\027[32m flag_fin: %d \027[0m \n" !flag_fin;
-    incr time
+    incr time;
+    if !time > 5000 then exit 1;
   done;
   let _ = Unix.select [] [] [] 10. in
   flush Plot.outc

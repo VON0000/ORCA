@@ -51,8 +51,8 @@ let get_dim () =
     Printf.printf "invalid input of the number of drones\n";
     exit 1
 
-(* let dim = get_dim () *)
-let dim = 10
+let dim = get_dim ()
+(* let dim = 10 *)
 
 let get_speed () =
   (* 打印提示信息 *)
@@ -68,8 +68,8 @@ let get_speed () =
     Printf.printf "invalid input of the speed of drones\n";
     exit 1
 
-(* let const_speed = get_speed () *)
-let const_speed = 1.
+let const_speed = get_speed ()
+(* let const_speed = 1. *)
 
 let get_pas () =
   (* 打印提示信息 *)
